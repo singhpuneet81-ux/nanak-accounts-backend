@@ -303,6 +303,17 @@ const customerName =
 // Use fixed production frontend URL
 const BASE_URL = 'https://online.nanakaccountants.com.au';
 
+  console.log("========== CHECKOUT DEBUG START ==========");
+
+  console.log("Content-Type:", req.headers['content-type']);
+
+  console.log("req.body keys:", Object.keys(req.body || {}));
+  console.log("Raw req.body.payload:", req.body.payload);
+
+  console.log("Files received:", req.files ? req.files.length : 0);
+  console.log("req.files:", req.files);
+
+  console.log("========== CHECKOUT DEBUG END ==========");
 const session = await stripe.checkout.sessions.create({
   customer_email: primaryEmail,
   line_items: [
