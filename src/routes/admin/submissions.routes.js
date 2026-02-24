@@ -23,10 +23,10 @@ router.use(requireRole('admin', 'manager', 'staff'));
 router.get('/', listSubmissions);
 router.get('/:id', getSubmissionById);
 
-router.put('/:id/assign', requireRole('admin','manager'), assignValidators, validate, assignSubmission);
+router.put('/:id/assign', requireRole('admin','manager','staff'), assignValidators, validate, assignSubmission);
 router.put('/:id/status', statusValidators, validate, updateStatus);
 router.post('/:id/notes', noteValidators, validate, addNote);
 router.post('/:id/request-document', requestDocumentValidators, validate, requestDocument);
-router.post('/:id/email-to-staff', requireRole('admin','manager'), emailToStaffValidators, validate, emailToStaff);
+router.post('/:id/email-to-staff', requireRole('admin','manager','staff'), emailToStaffValidators, validate, emailToStaff);
 
 module.exports = router;

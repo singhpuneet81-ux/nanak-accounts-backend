@@ -13,7 +13,7 @@ const {
 
 function canAccessSubmission(user, submission) {
   if (!user) return false;
-  if (user.role === 'admin' || user.role === 'manager') return true;
+  if (user.role === 'admin' || user.role === 'manager' || user.role === 'staff') return true;
   if (user.role === 'staff') return submission.assignedTo && String(submission.assignedTo) === String(user._id);
   return false;
 }

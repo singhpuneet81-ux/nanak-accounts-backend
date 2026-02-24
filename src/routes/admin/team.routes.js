@@ -13,7 +13,7 @@ const {
 } = require('../../controllers/admin/team.controller');
 
 router.use(protect);
-router.use(requireRole('admin', 'manager'));
+router.use(requireRole('admin', 'manager','staff'));
 
 router.get('/', listTeam);
 router.post('/', createValidators, validate, createMember);
