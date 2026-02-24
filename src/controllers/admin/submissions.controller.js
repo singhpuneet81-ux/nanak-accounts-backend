@@ -278,7 +278,33 @@ const emailToStaff = asyncHandler(async (req, res) => {
   await submission.save();
   await logActivity(submission._id, activity.action, activity.description, activity.doneBy, { staffId: staff._id });
 
-  res.json({ success: true, message: `Submission emailed to ${staff.name}` });
+  res.
+  const updatePaymentStatus = asyncHandler(async (req, res) => {
+  const submission = await Submission.findById(req.params.id);
+
+  if (!submission) {
+    return res.status(404).json({ success: false, message: 'Submission not found' });
+  }
+
+  if (!(req.user.role === 'admin' || req.user.role === 'manager')) {
+    return res.status(403).json({ success: false, message: 'Forbidden' });
+  }
+
+  const { paymentStatus } = req.body;
+
+  submission.paymentStatus = paymentStatus;
+
+  submission.activityLog.push({
+    action: 'payment_status',
+    description: `Payment status changed to ${paymentStatus}`,
+    doneBy: req.user.name,
+    timestamp: new Date(),
+  });
+
+  await submission.save();
+
+  res.json({ success: true, submission });
+});({ success: true, message: `Submission emailed to ${staff.name}` });
 });
 
 module.exports = {
@@ -294,4 +320,5 @@ module.exports = {
   noteValidators,
   requestDocumentValidators,
   emailToStaffValidators,
+  updatePaymentStatus,
 };
