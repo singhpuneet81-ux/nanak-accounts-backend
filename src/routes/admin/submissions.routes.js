@@ -30,5 +30,9 @@ router.post('/:id/notes', noteValidators, validate, addNote);
 router.post('/:id/request-document', requestDocumentValidators, validate, requestDocument);
 router.post('/:id/email-to-staff', requireRole('admin','manager'), emailToStaffValidators, validate, emailToStaff);
 
-router.patch('/:id/payment-status', requireRole('admin','manager', 'staff'), updatePaymentStatus);
+router.patch(
+  '/:id/payment-status',
+  requireRole('admin','manager','staff'),
+  updatePaymentStatus
+);
 module.exports = router;
