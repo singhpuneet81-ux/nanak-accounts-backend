@@ -284,7 +284,7 @@ const updatePaymentStatus = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Submission not found' });
   }
 console.log(req, "req");
-  if (!(req.user.role === 'admin' || req.user.role === 'manager')) {
+  if (!(req.user.role === 'admin' || req.user.role === 'manager')|| req.user.role === 'staff') {
     return res.status(403).json({ success: false, message: 'Forbidden' });
   }
 
