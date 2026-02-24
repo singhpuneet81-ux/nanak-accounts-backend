@@ -29,6 +29,6 @@ router.put('/:id/status', statusValidators, validate, updateStatus);
 router.post('/:id/notes', noteValidators, validate, addNote);
 router.post('/:id/request-document', requestDocumentValidators, validate, requestDocument);
 router.post('/:id/email-to-staff', requireRole('admin','manager'), emailToStaffValidators, validate, emailToStaff);
-console.log("Logged in role:", req.user.role);
+
 router.patch('/:id/payment-status', requireRole('admin','manager', 'staff'), updatePaymentStatus);
 module.exports = router;
