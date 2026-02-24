@@ -13,21 +13,8 @@ const {
 
 function canAccessSubmission(user, submission) {
   if (!user) return false;
-
-  if (user.role === 'admin' || user.role === 'manager') {
-    return true;
-  }
-
-  if (user.role === 'staff') {
-    // Handle both populated object and raw ObjectId
-    const assignedId =
-      typeof submission.assignedTo === 'object'
-        ? submission.assignedTo?._id
-        : submission.assignedTo;
-
-    return assignedId && String(assignedId) === String(user._id);
-  }
-
+  if (user.role === 'admin' || user.role === 'manager') return true;
+  if (user.role === 'staff') return submission.assignedTo && String(submission.assignedTo) === String(user._id);
   return false;
 }
 
@@ -278,33 +265,7 @@ const emailToStaff = asyncHandler(async (req, res) => {
   await submission.save();
   await logActivity(submission._id, activity.action, activity.description, activity.doneBy, { staffId: staff._id });
 
-  res.
-  const updatePaymentStatus = asyncHandler(async (req, res) => {
-  const submission = await Submission.findById(req.params.id);
-
-  if (!submission) {
-    return res.status(404).json({ success: false, message: 'Submission not found' });
-  }
-
-  if (!(req.user.role === 'admin' || req.user.role === 'manager')) {
-    return res.status(403).json({ success: false, message: 'Forbidden' });
-  }
-
-  const { paymentStatus } = req.body;
-
-  submission.paymentStatus = paymentStatus;
-
-  submission.activityLog.push({
-    action: 'payment_status',
-    description: `Payment status changed to ${paymentStatus}`,
-    doneBy: req.user.name,
-    timestamp: new Date(),
-  });
-
-  await submission.save();
-
-  res.json({ success: true, submission });
-});({ success: true, message: `Submission emailed to ${staff.name}` });
+  res.json({ success: true, message: `Submission emailed to ${staff.name}` });
 });
 
 module.exports = {
@@ -320,5 +281,4 @@ module.exports = {
   noteValidators,
   requestDocumentValidators,
   emailToStaffValidators,
-  updatePaymentStatus,
 };
