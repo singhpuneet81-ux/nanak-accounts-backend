@@ -13,8 +13,21 @@ const {
 
 function canAccessSubmission(user, submission) {
   if (!user) return false;
-  if (user.role === 'admin' || user.role === 'manager') return true;
-  if (user.role === 'staff') return submission.assignedTo && String(submission.assignedTo) === String(user._id);
+
+  if (user.role === 'admin' || user.role === 'manager') {
+    return true;
+  }
+
+  if (user.role === 'staff') {
+    // Handle both populated object and raw ObjectId
+    const assignedId =
+      typeof submission.assignedTo === 'object'
+        ? submission.assignedTo?._id
+        : submission.assignedTo;
+
+    return assignedId && String(assignedId) === String(user._id);
+  }
+
   return false;
 }
 
