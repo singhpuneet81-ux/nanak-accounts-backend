@@ -12,6 +12,7 @@ const {
   emailToStaff,
   assignValidators,
   statusValidators,
+  updatePaymentStatus,
   noteValidators,
   requestDocumentValidators,
   emailToStaffValidators,
