@@ -1,23 +1,30 @@
-const path = require('path');
-const { body } = require('express-validator');
-const Submission = require('../models/Submission');
-const { asyncHandler } = require('../middleware/asyncHandler');
-const { generateOrderNumber } = require('../utils/orderNumber');
-const { getServiceName } = require('../utils/serviceMap');
-const { notifyStaffNewSubmission } = require('../services/emailService');
-const { getStripe } = require('../config/stripe');
+const path = require("path");
+const { body } = require("express-validator");
+const Submission = require("../models/Submission");
+const { asyncHandler } = require("../middleware/asyncHandler");
+const { generateOrderNumber } = require("../utils/orderNumber");
+const { getServiceName } = require("../utils/serviceMap");
+const { notifyStaffNewSubmission } = require("../services/emailService");
+const { getStripe } = require("../config/stripe");
 const {
   sendSubmissionConfirmationToUser,
-  notifyAdminNewSubmission
-} = require('../services/emailService');
+  notifyAdminNewSubmission,
+} = require("../services/emailService");
 const submitFormValidators = [
-  body('serviceKey').isString().notEmpty(),
-  body('customerName').isString().notEmpty(),
-  body('email').isEmail().normalizeEmail(),
-  body('phone').isString().notEmpty(),
-  body('packageType').isString().notEmpty(),
-  body('amount').isNumeric(),
+  body("serviceKey").isString().notEmpty(),
+  body("customerName").isString().notEmpty(),
+  body("email").isEmail().normalizeEmail(),
+  body("phone").isString().notEmpty(),
+  body("packageType").isString().notEmpty(),
+  body("amount").isNumeric(),
 ];
+
+const {
+  sendSubmissionConfirmationToUser,
+  notifyAdminNewSubmission,
+  sendPaymentSuccessEmailToUser,
+  notifyAdminPaymentReceived,
+} = require("../services/emailService");
 
 const submitForm = asyncHandler(async (req, res) => {
   const {
@@ -30,7 +37,7 @@ const submitForm = asyncHandler(async (req, res) => {
     amount,
   } = req.body;
 
-  const orderNumber = generateOrderNumber('NA');
+  const orderNumber = generateOrderNumber("NA");
 
   const submission = await Submission.create({
     orderNumber,
@@ -43,13 +50,13 @@ const submitForm = asyncHandler(async (req, res) => {
     selections: {},
     packageType,
     amount: Number(amount),
-    paymentStatus: 'pending',
-    jobStatus: 'new',
+    paymentStatus: "pending",
+    jobStatus: "new",
     activityLog: [
       {
-        action: 'created',
-        description: 'Submission received',
-        doneBy: 'System',
+        action: "created",
+        description: "Submission received",
+        doneBy: "System",
         timestamp: new Date(),
       },
     ],
@@ -60,14 +67,14 @@ const submitForm = asyncHandler(async (req, res) => {
     await notifyStaffNewSubmission(submission);
   } catch (e) {
     // do not fail request due to email
-    console.warn('Email notifyStaffNewSubmission failed:', e.message);
+    console.warn("Email notifyStaffNewSubmission failed:", e.message);
   }
 
   res.status(201).json({
     success: true,
     orderNumber: submission.orderNumber,
     submissionId: submission._id,
-    message: 'Submission received successfully',
+    message: "Submission received successfully",
   });
 });
 
@@ -85,18 +92,14 @@ function resolvePrimaryEmail(customer) {
   if (customer.iaContactEmail) return customer.iaContactEmail;
 
   // Charity CLG
-  if (customer.clgDirectors?.[0]?.email)
-    return customer.clgDirectors[0].email;
+  if (customer.clgDirectors?.[0]?.email) return customer.clgDirectors[0].email;
 
-  if (customer.clgMembers?.[0]?.email)
-    return customer.clgMembers[0].email;
+  if (customer.clgMembers?.[0]?.email) return customer.clgMembers[0].email;
 
   // Trust / Company / SMSF patterns
-  if (customer.directors?.[0]?.email)
-    return customer.directors[0].email;
+  if (customer.directors?.[0]?.email) return customer.directors[0].email;
 
-  if (customer.shareholders?.[0]?.email)
-    return customer.shareholders[0].email;
+  if (customer.shareholders?.[0]?.email) return customer.shareholders[0].email;
 
   if (customer.beneficiaries?.[0]?.email)
     return customer.beneficiaries[0].email;
@@ -137,18 +140,14 @@ function resolvePrimaryPhone(customer) {
   if (customer.iaContactPhone) return customer.iaContactPhone;
 
   // Charity CLG
-  if (customer.clgDirectors?.[0]?.phone)
-    return customer.clgDirectors[0].phone;
+  if (customer.clgDirectors?.[0]?.phone) return customer.clgDirectors[0].phone;
 
-  if (customer.clgMembers?.[0]?.phone)
-    return customer.clgMembers[0].phone;
+  if (customer.clgMembers?.[0]?.phone) return customer.clgMembers[0].phone;
 
   // Trust / Company / SMSF
-  if (customer.directors?.[0]?.phone)
-    return customer.directors[0].phone;
+  if (customer.directors?.[0]?.phone) return customer.directors[0].phone;
 
-  if (customer.shareholders?.[0]?.phone)
-    return customer.shareholders[0].phone;
+  if (customer.shareholders?.[0]?.phone) return customer.shareholders[0].phone;
 
   if (customer.beneficiaries?.[0]?.phone)
     return customer.beneficiaries[0].phone;
@@ -183,82 +182,89 @@ function resolvePrimaryPhone(customer) {
 const checkoutSubmit = asyncHandler(async (req, res) => {
   const payloadStr = req.body.payload;
   if (!payloadStr) {
-    return res.status(400).json({ success: false, message: 'Missing payload' });
+    return res.status(400).json({ success: false, message: "Missing payload" });
   }
 
   let payload;
   try {
     payload = JSON.parse(payloadStr);
   } catch {
-    return res.status(400).json({ success: false, message: 'Invalid payload JSON' });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid payload JSON" });
   }
 
   const { serviceKey, customer = {}, selections = {}, pricing, meta } = payload;
 
   if (!serviceKey) {
-    return res.status(400).json({ success: false, message: 'serviceKey required' });
+    return res
+      .status(400)
+      .json({ success: false, message: "serviceKey required" });
   }
 
-  if (!pricing || typeof pricing.total !== 'number') {
-    return res.status(400).json({ success: false, message: 'pricing.total required' });
+  if (!pricing || typeof pricing.total !== "number") {
+    return res
+      .status(400)
+      .json({ success: false, message: "pricing.total required" });
   }
 
+  // 🔥 Resolve primary email dynamically
+  let primaryEmail = resolvePrimaryEmail(customer);
 
-// 🔥 Resolve primary email dynamically
-let primaryEmail = resolvePrimaryEmail(customer);
+  // 🔥 Bare Trust fallback logic
+  if (!primaryEmail && serviceKey === "bare_trust") {
+    primaryEmail =
+      customer.email ||
+      customer.cardholderEmail ||
+      (customer.signature && customer.signature.includes("@")
+        ? customer.signature
+        : null);
+  }
 
-// 🔥 Bare Trust fallback logic
-if (!primaryEmail && serviceKey === "bare_trust") {
-  primaryEmail =
-    customer.email ||
-    customer.cardholderEmail ||
-    (customer.signature && customer.signature.includes("@")
-      ? customer.signature
-      : null);
-}
-
-// 🔥 Absolute fallback (system placeholder)
-if (!primaryEmail && serviceKey === "bare_trust") {
-  primaryEmail = "baretrust@system.local";
-}
-
-if (!primaryEmail) {
-  return res.status(400).json({
-    success: false,
-    message: 'customer.email required',
-  });
-}
-
-
+  // 🔥 Absolute fallback (system placeholder)
+  if (!primaryEmail && serviceKey === "bare_trust") {
+    primaryEmail = "baretrust@system.local";
+  }
 
   if (!primaryEmail) {
     return res.status(400).json({
       success: false,
-      message: 'customer.email required',
+      message: "customer.email required",
+    });
+  }
+
+  if (!primaryEmail) {
+    return res.status(400).json({
+      success: false,
+      message: "customer.email required",
     });
   }
 
   // 🔥 Resolve primary phone dynamically
-let primaryPhone = resolvePrimaryPhone(customer);
+  let primaryPhone = resolvePrimaryPhone(customer);
 
-// 🔥 If phone not found, assign system fallback
-if (!primaryPhone) {
-  primaryPhone = "0000000000"; // fallback to satisfy mongoose required field
-}
-
+  // 🔥 If phone not found, assign system fallback
+  if (!primaryPhone) {
+    primaryPhone = "0000000000"; // fallback to satisfy mongoose required field
+  }
 
   // 🔥 Resolve customer name dynamically
-const customerName =
-  [customer.firstName, customer.lastName].filter(Boolean).join(' ') ||
-  [customer.appointorFirstName, customer.appointorLastName].filter(Boolean).join(' ') ||
-  [customer.iaContactFirstName, customer.iaContactLastName].filter(Boolean).join(' ') ||
-  customer.directors?.[0]?.fullName ||
-  customer.iaCommitteeMembers?.[0]?.firstName + ' ' + customer.iaCommitteeMembers?.[0]?.lastName ||
-  payload.customerName ||
-  'Customer';
+  const customerName =
+    [customer.firstName, customer.lastName].filter(Boolean).join(" ") ||
+    [customer.appointorFirstName, customer.appointorLastName]
+      .filter(Boolean)
+      .join(" ") ||
+    [customer.iaContactFirstName, customer.iaContactLastName]
+      .filter(Boolean)
+      .join(" ") ||
+    customer.directors?.[0]?.fullName ||
+    customer.iaCommitteeMembers?.[0]?.firstName +
+      " " +
+      customer.iaCommitteeMembers?.[0]?.lastName ||
+    payload.customerName ||
+    "Customer";
 
-
-  const orderNumber = generateOrderNumber('NA');
+  const orderNumber = generateOrderNumber("NA");
 
   const files = (req.files || []).map((f) => ({
     field: f.fieldname,
@@ -277,53 +283,52 @@ const customerName =
     phone: primaryPhone,
     formData: { ...customer, meta },
     selections,
-    packageType: selections?.packageType || payload.packageType || 'Standard',
+    packageType: selections?.packageType || payload.packageType || "Standard",
     amount: Number(pricing.total),
-    paymentStatus: Number(pricing.total) === 0 ? 'pending' : 'pending_payment',
-    jobStatus: 'new',
+    paymentStatus: Number(pricing.total) === 0 ? "pending" : "pending_payment",
+    jobStatus: "new",
     files,
     activityLog: [
       {
-        action: 'created',
-        description: 'Submission received',
-        doneBy: 'System',
+        action: "created",
+        description: "Submission received",
+        doneBy: "System",
         timestamp: new Date(),
       },
     ],
   });
 
   // ✅ If free consultation (total = 0), skip Stripe
- if (Number(pricing.total) === 0) {
+  if (Number(pricing.total) === 0) {
+    // 🔥 Send email to user
+    try {
+      await sendSubmissionConfirmationToUser(submission);
+    } catch (e) {
+      console.warn("User email failed:", e.message);
+    }
 
-  // 🔥 Send email to user
-  try {
-    await sendSubmissionConfirmationToUser(submission);
-  } catch (e) {
-    console.warn("User email failed:", e.message);
+    // 🔥 Send email to admin
+    try {
+      await notifyAdminNewSubmission(submission);
+    } catch (e) {
+      console.warn("Admin email failed:", e.message);
+    }
+
+    return res.json({
+      success: true,
+      submissionId: submission._id,
+      message: "Free consultation submitted successfully",
+    });
   }
 
-  // 🔥 Send email to admin
-  try {
-    await notifyAdminNewSubmission(submission);
-  } catch (e) {
-    console.warn("Admin email failed:", e.message);
-  }
+  const stripe = getStripe();
 
-  return res.json({
-    success: true,
-    submissionId: submission._id,
-    message: 'Free consultation submitted successfully',
-  });
-}
-
- const stripe = getStripe();
-
-// Use fixed production frontend URL
-const BASE_URL = 'https://online.nanakaccountants.com.au';
+  // Use fixed production frontend URL
+  const BASE_URL = "https://online.nanakaccountants.com.au";
 
   console.log("========== CHECKOUT DEBUG START ==========");
 
-  console.log("Content-Type:", req.headers['content-type']);
+  console.log("Content-Type:", req.headers["content-type"]);
 
   console.log("req.body keys:", Object.keys(req.body || {}));
   console.log("Raw req.body.payload:", req.body.payload);
@@ -332,33 +337,33 @@ const BASE_URL = 'https://online.nanakaccountants.com.au';
   console.log("req.files:", req.files);
 
   console.log("========== CHECKOUT DEBUG END ==========");
-const session = await stripe.checkout.sessions.create({
-  customer_email: primaryEmail,
-  line_items: [
-    {
-      price_data: {
-        currency: (process.env.CURRENCY || 'aud').toLowerCase(),
-        unit_amount: Math.round(Number(pricing.total) * 100),
-        product_data: {
-          name: getServiceName(serviceKey),
-          description: `Nanak Accounts - ${getServiceName(serviceKey)}`,
+  const session = await stripe.checkout.sessions.create({
+    customer_email: primaryEmail,
+    line_items: [
+      {
+        price_data: {
+          currency: (process.env.CURRENCY || "aud").toLowerCase(),
+          unit_amount: Math.round(Number(pricing.total) * 100),
+          product_data: {
+            name: getServiceName(serviceKey),
+            description: `Nanak Accounts - ${getServiceName(serviceKey)}`,
+          },
         },
+        quantity: 1,
       },
-      quantity: 1,
+    ],
+    mode: "payment",
+
+    // Updated URLs (as requested)
+    success_url: `${BASE_URL}/payment-success`,
+    cancel_url: `${BASE_URL}/payment-failure`,
+
+    metadata: {
+      submission_id: String(submission._id),
+      service_key: serviceKey,
+      order_number: orderNumber,
     },
-  ],
-  mode: 'payment',
-
-  // Updated URLs (as requested)
-  success_url: `${BASE_URL}/payment-success`,
-  cancel_url: `${BASE_URL}/payment-failure`,
-
-  metadata: {
-    submission_id: String(submission._id),
-    service_key: serviceKey,
-    order_number: orderNumber,
-  },
-});
+  });
 
   submission.stripeCheckoutSessionId = session.id;
   await submission.save();
@@ -371,15 +376,15 @@ const session = await stripe.checkout.sessions.create({
   });
 });
 
-
 const createCheckoutSession = asyncHandler(async (req, res) => {
   try {
-    const { submissionId, amount, currency, serviceName, customerEmail } = req.body;
+    const { submissionId, amount, currency, serviceName, customerEmail } =
+      req.body;
 
     if (!submissionId || !amount || !customerEmail) {
       return res.status(400).json({
         success: false,
-        message: 'submissionId, amount, customerEmail required',
+        message: "submissionId, amount, customerEmail required",
       });
     }
 
@@ -388,21 +393,21 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
     if (!submission) {
       return res.status(404).json({
         success: false,
-        message: 'Submission not found',
+        message: "Submission not found",
       });
     }
 
     const stripe = getStripe();
 
     // Your production domain
-    const BASE_URL = 'https://online.nanakaccountants.com.au';
+    const BASE_URL = "https://online.nanakaccountants.com.au";
 
     const session = await stripe.checkout.sessions.create({
       customer_email: customerEmail,
       line_items: [
         {
           price_data: {
-            currency: (currency || process.env.CURRENCY || 'aud').toLowerCase(),
+            currency: (currency || process.env.CURRENCY || "aud").toLowerCase(),
             unit_amount: Math.round(Number(amount) * 100), // Stripe expects cents
             product_data: {
               name: serviceName || submission.serviceName,
@@ -412,7 +417,7 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
           quantity: 1,
         },
       ],
-      mode: 'payment',
+      mode: "payment",
       success_url: `${BASE_URL}/payment-success`,
       cancel_url: `${BASE_URL}/payment-failure`,
       metadata: {
@@ -430,10 +435,10 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
       sessionId: session.id,
     });
   } catch (error) {
-    console.error('Stripe Checkout Error:', error);
+    console.error("Stripe Checkout Error:", error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to create checkout session',
+      message: "Failed to create checkout session",
     });
   }
 });

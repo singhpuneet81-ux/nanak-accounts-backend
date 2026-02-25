@@ -1,4 +1,5 @@
-const { sendMail } = require('./mailer');
+const { sendMail } = require("./mailer");
+const { generatePaymentReceipt } = require("./receiptGenerator");
 
 async function sendSubmissionConfirmationToUser(submission) {
   const subject = `Submission received - ${submission.orderNumber}`;
@@ -8,7 +9,12 @@ async function sendSubmissionConfirmationToUser(submission) {
     <p>Service: <b>${submission.serviceName}</b></p>
     <p>We’ll contact you shortly.</p>
   `;
-  return sendMail({ to: submission.email, subject, html, text: `We received your submission. Order: ${submission.orderNumber}` });
+  return sendMail({
+    to: submission.email,
+    subject,
+    html,
+    text: `We received your submission. Order: ${submission.orderNumber}`,
+  });
 }
 
 async function notifyAdminNewSubmission(submission) {
@@ -21,7 +27,12 @@ async function notifyAdminNewSubmission(submission) {
     <p>Service: <b>${submission.serviceName}</b></p>
     <p>Amount: <b>${submission.amount}</b> | Payment: <b>${submission.paymentStatus}</b></p>
   `;
-  return sendMail({ to: process.env.ADMIN_NOTIFY_EMAIL, subject, html, text: `New submission: ${submission.orderNumber}` });
+  return sendMail({
+    to: process.env.ADMIN_NOTIFY_EMAIL,
+    subject,
+    html,
+    text: `New submission: ${submission.orderNumber}`,
+  });
 }
 
 module.exports = {
