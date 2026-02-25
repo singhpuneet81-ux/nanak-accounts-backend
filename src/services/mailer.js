@@ -41,27 +41,41 @@ const transporter = require("nodemailer").createTransport({
 module.exports = transporter;
 
 const notifyAdminNewSubmission = async (submission) => {
-  return transporter.sendMail({
-    from: `"Nanak Accountants" <${process.env.MAIL_USER}>`,
-    to: ["shivanshunigam8@gmail.com", "singh.puneet81@gmail.com"],
-    subject: `New Submission - ${submission.serviceName}`,
-    html: `
-      <h2>New Submission Received</h2>
-      <p><strong>Order:</strong> ${submission.orderNumber}</p>
-      <p><strong>Name:</strong> ${submission.customerName}</p>
-      <p><strong>Email:</strong> ${submission.email}</p>
-      <p><strong>Phone:</strong> ${submission.phone}</p>
-      <p><strong>Amount:</strong> $${submission.amount}</p>
-    `,
-  });
+  console.log("📩 [ADMIN MAIL START] New submission:", submission.orderNumber);
+
+  try {
+    const info = await transporter.sendMail({
+      from: `"Nanak Accountants" <${process.env.MAIL_USER}>`,
+      to: ["shivanshunigam8@gmail.com", "singh.puneet81@gmail.com"],
+      subject: `New Submission - ${submission.serviceName}`,
+      html: `
+        <h2>New Submission Received</h2>
+        <p><strong>Order:</strong> ${submission.orderNumber}</p>
+        <p><strong>Name:</strong> ${submission.customerName}</p>
+        <p><strong>Email:</strong> ${submission.email}</p>
+        <p><strong>Phone:</strong> ${submission.phone}</p>
+        <p><strong>Amount:</strong> $${submission.amount}</p>
+      `,
+    });
+
+    console.log("✅ [ADMIN MAIL SENT]");
+    console.log("📨 [ADMIN MAIL RESPONSE]", info.response);
+
+    return info;
+  } catch (error) {
+    console.error("❌ [ADMIN MAIL ERROR]", error.message);
+    throw error;
+  }
 };
 
 const sendPaymentSuccessEmailToUser = async (submission) => {
+  console.log("📧 [MAIL START] Payment email for:", submission.orderNumber);
+
   // 1️⃣ Generate PDF
   const receiptPath = await generatePaymentReceipt(submission);
+  console.log("📎 [PDF GENERATED]", receiptPath);
 
   try {
-    // 2️⃣ Send email with attachment
     const info = await transporter.sendMail({
       from: `"Nanak Accountants" <${process.env.MAIL_USER}>`,
       to: submission.email,
@@ -109,12 +123,20 @@ const sendPaymentSuccessEmailToUser = async (submission) => {
       ],
     });
 
+    console.log("✅ [MAIL SENT] To:", submission.email);
+    console.log("📨 [MAIL RESPONSE]", info.response);
+
     return info;
+  } catch (error) {
+    console.error("❌ [MAIL ERROR]", error.message);
+    throw error;
   } finally {
-    // 3️⃣ ALWAYS delete temp file (even if mail fails)
     if (receiptPath && fs.existsSync(receiptPath)) {
       fs.unlinkSync(receiptPath);
+      console.log("🧹 [CLEANUP] Temp receipt deleted");
     }
+
+    console.log("📧 [MAIL END] Process completed for:", submission.orderNumber);
   }
 };
 
