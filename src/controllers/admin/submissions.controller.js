@@ -132,41 +132,54 @@ const assignSubmission = asyncHandler(async (req, res) => {
 });
 
 const statusValidators = [
-  body('jobStatus').isIn(['new', 'assigned', 'in_progress', 'review', 'completed']).withMessage('Invalid status'),
+  body('jobStatus')
+    .isIn([
+      'new',
+      'assigned',
+      'in_progress',
+      'contacted',
+      'awaiting_docs',
+      'completed',
+      'cancelled'
+    ])
+    .withMessage('Invalid status'),
   param('id').isString().notEmpty(),
 ];
 
 const updateStatus = asyncHandler(async (req, res) => {
   const submission = await Submission.findById(req.params.id);
-  if (!submission) return res.status(404).json({ success: false, message: 'Submission not found' });
+
+  if (!submission) {
+    return res.status(404).json({
+      success: false,
+      message: 'Submission not found',
+    });
+  }
 
   if (!canAccessSubmission(req.user, submission)) {
-    return res.status(403).json({ success: false, message: 'Forbidden' });
+    return res.status(403).json({
+      success: false,
+      message: 'Forbidden',
+    });
   }
 
   const { jobStatus } = req.body;
+
   submission.jobStatus = jobStatus;
 
-  const activity = {
-    action: 'status',
-    description: `Status changed to ${jobStatus.replace('_', ' ').toUpperCase()}`,
+  submission.activityLog.push({
+    action: 'job_status',
+    description: `Job status changed to ${jobStatus.replace(/_/g, ' ')}`,
     doneBy: req.user.name,
     timestamp: new Date(),
-  };
-  submission.activityLog.push(activity);
+  });
+
   await submission.save();
-  await logActivity(submission._id, activity.action, activity.description, activity.doneBy, { jobStatus });
 
-  // If completed, notify customer (best-effort)
-  if (jobStatus === 'completed') {
-    try {
-      await notifyCustomerCompleted(submission);
-    } catch (e) {
-      console.warn('notifyCustomerCompleted failed:', e.message);
-    }
-  }
-
-  res.json({ success: true, submission, activityLog: activity });
+  res.json({
+    success: true,
+    submission,
+  });
 });
 
 const noteValidators = [

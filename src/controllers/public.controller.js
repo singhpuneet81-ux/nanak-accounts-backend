@@ -6,7 +6,10 @@ const { generateOrderNumber } = require('../utils/orderNumber');
 const { getServiceName } = require('../utils/serviceMap');
 const { notifyStaffNewSubmission } = require('../services/emailService');
 const { getStripe } = require('../config/stripe');
-
+const {
+  sendSubmissionConfirmationToUser,
+  notifyAdminNewSubmission
+} = require('../services/emailService');
 const submitFormValidators = [
   body('serviceKey').isString().notEmpty(),
   body('customerName').isString().notEmpty(),
@@ -290,13 +293,28 @@ const customerName =
   });
 
   // ✅ If free consultation (total = 0), skip Stripe
-  if (Number(pricing.total) === 0) {
-    return res.json({
-      success: true,
-      submissionId: submission._id,
-      message: 'Free consultation submitted successfully',
-    });
+ if (Number(pricing.total) === 0) {
+
+  // 🔥 Send email to user
+  try {
+    await sendSubmissionConfirmationToUser(submission);
+  } catch (e) {
+    console.warn("User email failed:", e.message);
   }
+
+  // 🔥 Send email to admin
+  try {
+    await notifyAdminNewSubmission(submission);
+  } catch (e) {
+    console.warn("Admin email failed:", e.message);
+  }
+
+  return res.json({
+    success: true,
+    submissionId: submission._id,
+    message: 'Free consultation submitted successfully',
+  });
+}
 
  const stripe = getStripe();
 
