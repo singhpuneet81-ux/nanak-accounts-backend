@@ -10,16 +10,28 @@ function startOfTodayUTC() {
 const getStats = asyncHandler(async (_req, res) => {
   const today = startOfTodayUTC();
 
-  const [newToday, pendingPayment, inProgress, completed, failedPayments, revenueTodayAgg] = await Promise.all([
+  const [
+    newToday,
+    pendingPayment,
+    inProgress,
+    completed,
+    failedPayments,
+    revenueTodayAgg
+  ] = await Promise.all([
     Submission.countDocuments({ createdAt: { $gte: today } }),
     Submission.countDocuments({ paymentStatus: { $in: ['pending', 'pending_payment'] } }),
     Submission.countDocuments({ jobStatus: 'in_progress' }),
     Submission.countDocuments({ jobStatus: 'completed' }),
     Submission.countDocuments({ paymentStatus: { $in: ['failed', 'payment_failed'] } }),
     Submission.aggregate([
-      { $match: { createdAt: { $gte: today }, paymentStatus: { $in: ['paid', 'payment_complete'] } } },
-      { $group: { _id: null, total: { $sum: '$amount' } } },
-    ]),
+      {
+        $match: {
+          paymentCompletedAt: { $gte: today },
+          paymentStatus: { $in: ['paid', 'payment_complete'] }
+        }
+      },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ])
   ]);
 
   const revenueToday = revenueTodayAgg?.[0]?.total || 0;
@@ -30,7 +42,7 @@ const getStats = asyncHandler(async (_req, res) => {
     inProgress,
     completed,
     failedPayments,
-    revenueToday,
+    revenueToday
   });
 });
 

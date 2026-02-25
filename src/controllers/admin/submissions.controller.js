@@ -13,8 +13,16 @@ const {
 
 function canAccessSubmission(user, submission) {
   if (!user) return false;
+
   if (user.role === 'admin' || user.role === 'manager' || user.role === 'staff') return true;
-  if (user.role === 'staff') return submission.assignedTo && String(submission.assignedTo) === String(user._id);
+
+  if (user.role === 'staff') {
+    const assignedId =
+      submission.assignedTo?._id || submission.assignedTo;
+
+    return String(assignedId) === String(user._id);
+  }
+
   return false;
 }
 
@@ -275,14 +283,19 @@ const updatePaymentStatus = asyncHandler(async (req, res) => {
   if (!submission) {
     return res.status(404).json({ success: false, message: 'Submission not found' });
   }
-console.log(req, "req");
-  if ((req.user.role === 'admin' || req.user.role === 'manager')|| req.user.role === 'staff') {
+
+  if (!(req.user.role === 'admin' || req.user.role === 'manager' || req.user.role === 'staff')) {
     return res.status(403).json({ success: false, message: 'Forbidden' });
   }
 
   const { paymentStatus } = req.body;
 
   submission.paymentStatus = paymentStatus;
+
+  // 🔥 ADD THIS
+  if (paymentStatus === "payment_complete") {
+    submission.paymentCompletedAt = new Date();
+  }
 
   submission.activityLog.push({
     action: 'payment_status',

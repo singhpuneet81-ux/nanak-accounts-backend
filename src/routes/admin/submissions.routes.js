@@ -28,6 +28,6 @@ router.put('/:id/assign', requireRole('admin','manager','staff'), assignValidato
 router.put('/:id/status', statusValidators, validate, updateStatus);
 router.post('/:id/notes', noteValidators, validate, addNote);
 router.post('/:id/request-document', requestDocumentValidators, validate, requestDocument);
-router.post('/:id/email-to-staff', requireRole('admin','manager'), emailToStaffValidators, validate, emailToStaff);
-router.patch('/:id/payment-status', requireRole('admin','manager'), updatePaymentStatus);
+router.post('/:id/email-to-staff', requireRole('admin','manager','staff'), emailToStaffValidators, validate, emailToStaff);
+router.patch('/:id/payment-status', requireRole('admin','manager','staff'), updatePaymentStatus);
 module.exports = router;
