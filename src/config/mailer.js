@@ -1,17 +1,26 @@
 const nodemailer = require('nodemailer');
 
-function createTransporter() {
-  if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
-    throw new Error('SMTP_EMAIL / SMTP_PASSWORD missing in .env');
-  }
+const transporter = nodemailer.createTransport({
+  host: process.env.MAIL_HOST || 'smtp.office365.com',
+  port: Number(process.env.MAIL_PORT || 587),
+  secure: false, // STARTTLS
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+  tls: {
+    ciphers: 'SSLv3',
+  },
+});
 
-  return nodemailer.createTransport({
-    service: process.env.SMTP_SERVICE || 'gmail',
-    auth: {
-      user: process.env.SMTP_EMAIL,
-      pass: process.env.SMTP_PASSWORD,
-    },
+async function sendMail({ to, subject, html, text }) {
+  return transporter.sendMail({
+    from: `"${process.env.MAIL_FROM_NAME || 'Nanak Accounts'}" <${process.env.MAIL_FROM_EMAIL || process.env.MAIL_USER}>`,
+    to,
+    subject,
+    text,
+    html,
   });
 }
 
-module.exports = { createTransporter };
+module.exports = { sendMail, transporter };

@@ -1,48 +1,31 @@
-// Send confirmation to customer
-const sendSubmissionConfirmationToUser = async (submission) => {
-  const subject = "🎉 Submission Received Successfully";
+const { sendMail } = require('./mailer');
 
+async function sendSubmissionConfirmationToUser(submission) {
+  const subject = `Submission received - ${submission.orderNumber}`;
   const html = `
-    <h2>Congratulations ${submission.customerName || ''}!</h2>
-    <p>Your information has been successfully submitted.</p>
-    <p><strong>Service:</strong> ${submission.serviceName}</p>
-    <p><strong>Order Number:</strong> ${submission.orderNumber || submission._id}</p>
-    <br/>
-    <p>Our team will contact you shortly.</p>
-    <br/>
-    <p>Regards,<br/>Support Team</p>
+    <h2>Thanks! We received your submission ✅</h2>
+    <p>Order: <b>${submission.orderNumber}</b></p>
+    <p>Service: <b>${submission.serviceName}</b></p>
+    <p>We’ll contact you shortly.</p>
   `;
+  return sendMail({ to: submission.email, subject, html, text: `We received your submission. Order: ${submission.orderNumber}` });
+}
 
-  await sendEmail({
-    to: submission.email,
-    subject,
-    html,
-  });
-};
-
-
-// Send notification to admin
-const notifyAdminNewSubmission = async (submission) => {
-  const subject = "🚀 New Submission Received";
-
+async function notifyAdminNewSubmission(submission) {
+  const subject = `New submission - ${submission.orderNumber}`;
   const html = `
-    <h2>New Submission Alert</h2>
-    <p><strong>Customer:</strong> ${submission.customerName}</p>
-    <p><strong>Email:</strong> ${submission.email}</p>
-    <p><strong>Service:</strong> ${submission.serviceName}</p>
-    <p><strong>Amount:</strong> ${submission.amount}</p>
-    <br/>
-    <p>Please check admin panel.</p>
+    <h2>New Submission 🚀</h2>
+    <p>Order: <b>${submission.orderNumber}</b></p>
+    <p>Name: <b>${submission.customerName}</b></p>
+    <p>Email: <b>${submission.email}</b></p>
+    <p>Service: <b>${submission.serviceName}</b></p>
+    <p>Amount: <b>${submission.amount}</b> | Payment: <b>${submission.paymentStatus}</b></p>
   `;
-
-  await sendEmail({
-    to: process.env.ADMIN_EMAIL,
-    subject,
-    html,
-  });
-};
+  return sendMail({ to: process.env.ADMIN_NOTIFY_EMAIL, subject, html, text: `New submission: ${submission.orderNumber}` });
+}
 
 module.exports = {
   sendSubmissionConfirmationToUser,
   notifyAdminNewSubmission,
+  // keep your existing exports too
 };
