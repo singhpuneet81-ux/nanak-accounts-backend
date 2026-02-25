@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const { generatePaymentReceipt } = require("./receiptGenerator");
+const { generatePaymentReceipt } = require("../services/receiptGenerator.js");
 // const transporter = nodemailer.createTransport({
 //   host: process.env.MAIL_HOST || 'smtp.office365.com',
 //   port: Number(process.env.MAIL_PORT || 587),

@@ -6,10 +6,10 @@ const { generateOrderNumber } = require("../utils/orderNumber");
 const { getServiceName } = require("../utils/serviceMap");
 const { notifyStaffNewSubmission } = require("../services/emailService");
 const { getStripe } = require("../config/stripe");
-const {
-  sendSubmissionConfirmationToUser,
-  notifyAdminNewSubmission,
-} = require("../services/emailService");
+// const {
+//   sendSubmissionConfirmationToUser,
+//   notifyAdminNewSubmission,
+// } = require("../services/emailService");
 const submitFormValidators = [
   body("serviceKey").isString().notEmpty(),
   body("customerName").isString().notEmpty(),
