@@ -38,7 +38,6 @@ const transporter = require("nodemailer").createTransport({
   },
 });
 
-module.exports = transporter;
 
 const notifyAdminNewSubmission = async (submission) => {
   console.log("📩 [ADMIN MAIL START] New submission:", submission.orderNumber);

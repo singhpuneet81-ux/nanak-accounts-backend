@@ -299,27 +299,19 @@ const checkoutSubmit = asyncHandler(async (req, res) => {
   });
 
   // ✅ If free consultation (total = 0), skip Stripe
-  if (Number(pricing.total) === 0) {
-    // 🔥 Send email to user
-    try {
-      await sendSubmissionConfirmationToUser(submission);
-    } catch (e) {
-      console.warn("User email failed:", e.message);
-    }
-
-    // 🔥 Send email to admin
-    try {
-      await notifyAdminNewSubmission(submission);
-    } catch (e) {
-      console.warn("Admin email failed:", e.message);
-    }
-
-    return res.json({
-      success: true,
-      submissionId: submission._id,
-      message: "Free consultation submitted successfully",
-    });
+ if (Number(pricing.total) === 0) {
+  try {
+    await notifyAdminNewSubmission(submission);
+  } catch (e) {
+    console.warn("Admin email failed:", e.message);
   }
+
+  return res.json({
+    success: true,
+    submissionId: submission._id,
+    message: "Form submitted successfully",
+  });
+}
 
   const stripe = getStripe();
 

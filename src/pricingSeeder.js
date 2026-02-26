@@ -4,8 +4,12 @@ const PricingService = require('./models/PricingService');
 const MONGO_URI = process.env.MONGODB_URI;
 
 const pricingData = [
+  // ═══════════════════════════════════════════
+  // CATEGORY 1: BUSINESS FORMATION (12 services)
+  // ═══════════════════════════════════════════
   {
     key: "abn",
+    category: "business_formation",
     label: "ABN Registration",
     foundation: {
       title: "Foundation Setup",
@@ -32,9 +36,9 @@ const pricingData = [
       extraCount: 8,
     },
   },
-
   {
     key: "business_name",
+    category: "business_formation",
     label: "Business Name",
     foundation: {
       title: "Foundation Setup",
@@ -61,9 +65,9 @@ const pricingData = [
       extraCount: 8,
     },
   },
-
   {
     key: "family_trust",
+    category: "business_formation",
     label: "Family Trust",
     foundation: {
       title: "Foundation Setup",
@@ -93,9 +97,9 @@ const pricingData = [
       extraCount: 10,
     },
   },
-
   {
     key: "gst",
+    category: "business_formation",
     label: "GST Registration",
     foundation: {
       title: "Foundation Setup",
@@ -122,9 +126,9 @@ const pricingData = [
       extraCount: 8,
     },
   },
-
   {
     key: "charity",
+    category: "business_formation",
     label: "Charity Setup",
     foundation: {
       title: "Foundation Setup",
@@ -154,9 +158,72 @@ const pricingData = [
       extraCount: 10,
     },
   },
-
+  {
+    key: "charity_ia",
+    category: "business_formation",
+    label: "Incorporated Association",
+    foundation: {
+      title: "Incorporated Association Setup",
+      price: 1899,
+      features: [
+        "ACNC Charity Registration",
+        "DGR Status Application (if eligible)",
+        "Charity Constitution & Governing Documents",
+        "ABN & TFN Registration for Charity",
+        "Responsible Persons Registration",
+        "Public Charity Register Listing",
+        "Tax Concession Applications",
+        "GST Concession Registration",
+        "FBT & Payroll Tax Exemptions",
+        "Fundraising Permit Guidance",
+        "Compliance Framework Setup",
+        "State Association Incorporation",
+      ],
+    },
+    accounting: {
+      includes: [
+        "Charity Bookkeeping & Fund Accounting",
+        "Annual Financial Statement Preparation (ACNC)",
+        "ACNC Annual Information Statement",
+        "Donor Receipt & Tax Deduction Management",
+      ],
+      extraCount: 10,
+    },
+  },
+  {
+    key: "charity_clg",
+    category: "business_formation",
+    label: "Company Limited by Guarantee",
+    foundation: {
+      title: "Company Limited by Guarantee Setup",
+      price: 2199,
+      features: [
+        "ACNC Charity Registration",
+        "ASIC Company (CLG) Registration",
+        "DGR Status Application (if eligible)",
+        "Charity Constitution & Governing Documents",
+        "ABN & TFN Registration for Charity",
+        "Director & Member Registration",
+        "Public Charity Register Listing",
+        "Tax Concession Applications",
+        "GST Concession Registration",
+        "FBT & Payroll Tax Exemptions",
+        "Compliance Framework Setup",
+      ],
+    },
+    accounting: {
+      includes: [
+        "Charity Bookkeeping & Fund Accounting",
+        "Annual Financial Statement Preparation (ACNC)",
+        "ACNC Annual Information Statement",
+        "Donor Receipt & Tax Deduction Management",
+      ],
+      extraCount: 10,
+    },
+  },
   {
     key: "company",
+    category: "business_formation",
     label: "Company Registration",
     foundation: {
       title: "Foundation Setup",
@@ -183,9 +250,9 @@ const pricingData = [
       extraCount: 8,
     },
   },
-
   {
     key: "smsf",
+    category: "business_formation",
     label: "SMSF Setup",
     foundation: {
       title: "Foundation Setup",
@@ -215,9 +282,9 @@ const pricingData = [
       extraCount: 10,
     },
   },
-
   {
     key: "partnership",
+    category: "business_formation",
     label: "Partnership",
     foundation: {
       title: "Foundation Setup",
@@ -247,9 +314,9 @@ const pricingData = [
       extraCount: 10,
     },
   },
-
   {
     key: "unit_trust",
+    category: "business_formation",
     label: "Unit Trust",
     foundation: {
       title: "Foundation Setup",
@@ -277,9 +344,9 @@ const pricingData = [
       extraCount: 10,
     },
   },
-
   {
     key: "bare_trust",
+    category: "business_formation",
     label: "Bare Trust",
     foundation: {
       title: "Foundation Setup",
@@ -307,187 +374,495 @@ const pricingData = [
       extraCount: 8,
     },
   },
+
+  // ═══════════════════════════════════════════
+  // CATEGORY 2: ACCOUNTING & TAX (10 services)
+  // ═══════════════════════════════════════════
   {
-  "key": "business_plan",
-  "label": "Business Plan",
-  "foundation": { "title": "Business Plan", "price": 990, "features": [] },
-  "accounting": { "includes": [], "extraCount": 0 },
-  "meta": {
-    "plans": [
-      {
-        "id": "startup",
-        "label": "Startup",
-        "subtitle": "Pre-launch or just established",
-        "badge": "Pre-launch / Startup stage",
-        "price": 990,
-        "delivery": "5-8 business days delivery",
-        "recommended": false,
-        "features": [
-          "3-5 year financial projections (P&L, Cash Flow)",
-          "Market analysis & competitor research",
-          "Executive summary & business overview",
-          "Marketing & sales strategy",
-          "Professional graphic design",
-          "Unlimited revisions (30 days)"
-        ]
-      },
-      {
-        "id": "growth",
-        "label": "Growth",
-        "subtitle": "Established and scaling operations",
-        "badge": "1-3 years in business",
-        "price": 1299,
-        "delivery": "5-8 business days delivery",
-        "recommended": true,
-        "features": [
-          "3-5 year comprehensive financial projections",
-          "In-depth market & competitor analysis",
-          "Growth strategy & expansion roadmap",
-          "Marketing plan with customer acquisition",
-          "Operational & organizational structure",
-          "Premium graphic design & formatting",
-          "Unlimited revisions (30 days)"
-        ]
-      },
-      {
-        "id": "established",
-        "label": "Established",
-        "subtitle": "Mature business seeking funding",
-        "badge": "3+ years in business",
-        "price": 1499,
-        "delivery": "5-8 business days delivery",
-        "recommended": false,
-        "features": [
-          "Comprehensive 3-5 year financial projections",
-          "Historical performance analysis",
-          "Advanced market positioning & strategy",
-          "Detailed marketing & growth plan",
-          "Risk assessment & mitigation strategies",
-          "Management & operations analysis",
-          "Premium design + Pitch deck included",
-          "Unlimited revisions (30 days)"
-        ]
-      }
-    ],
-    "addons": [
-      { "id": "pitch_deck", "label": "Investor Pitch Deck", "price": 750 },
-      { "id": "excel_model", "label": "Excel Financial Model", "price": 500 },
-      { "id": "pitch_training", "label": "Investor Presentation Training", "price": 650 },
-      { "id": "rush_delivery", "label": "Rush Delivery (3-4 business days)", "price": 500 }
-    ]
-  }
-},
-{
-  "key": "business_valuation",
-  "label": "Business Valuation",
-  "foundation": { "title": "Business Valuation", "price": 1399, "features": [] },
-  "accounting": { "includes": [], "extraCount": 0 },
-  "meta": {
-    "plans": [
-      {
-        "id": "appraisal",
-        "label": "Appraisal Report",
-        "subtitle": "Estimate of business value for internal use and general purposes",
-        "badge": null,
-        "price": 1399,
-        "delivery": "7-10 business days delivery",
-        "recommended": false,
-        "features": [
-          "Short-form Business Appraisal Report",
-          "Estimate of business value",
-          "Industry benchmarking analysis",
-          "Pre-release discussion with experts",
-          "Business & industry risk assessment"
-        ]
-      },
-      {
-        "id": "standard",
-        "label": "Standard Business Valuation",
-        "subtitle": "Comprehensive report for sale, divorce, disputes, or court proceedings",
-        "badge": "MOST POPULAR · COURT ACCEPTED",
-        "price": 3159,
-        "delivery": "7-10 business days delivery",
-        "recommended": true,
-        "features": [
-          "Detailed Business Valuation Report",
-          "Comprehensive financial statement analysis",
-          "Detailed industry & market analysis",
-          "Pre-release discussion with experts",
-          "Risk analysis & adjustment factors",
-          "Court-acceptable documentation",
-          "Multiple valuation methodologies"
-        ]
-      }
-    ]
-  }
-},
-{
-  "key": "business_due_diligence",
-  "label": "Business Due Diligence",
-  "foundation": { "title": "Business Due Diligence", "price": 500, "features": [] },
-  "accounting": { "includes": [], "extraCount": 0 },
-  "meta": {
-    "plans": [
-      {
-        "id": "snapshot",
-        "label": "Financial Snapshot Review",
-        "subtitle": "Essential Review",
-        "badge": null,
-        "price": 500,
-        "delivery": "3-5 business days",
-        "recommended": false,
-        "features": [
-          "2 year financial statement analysis",
-          "Revenue & profit trend review",
-          "Expense and margin analysis",
-          "Basic cash flow review",
-          "Working capital health check",
-          "Industry ratio comparison",
-          "Risk flag summary report",
-          "30 min strategy call"
-        ]
-      },
-      {
-        "id": "comprehensive",
-        "label": "Comprehensive Financial DD",
-        "subtitle": "Full Analysis & Valuation",
-        "badge": "RECOMMENDED",
-        "price": 1500,
-        "delivery": "5-7 business days",
-        "recommended": true,
-        "features": [
-          "3-5 year deep financial analysis",
-          "Normalised earnings adjustment (EBITDA correction)",
-          "Valuation using EBITDA multiple, revenue multiple, DCF",
-          "Tax risk exposure analysis",
-          "Owner add-backs review",
-          "Cash flow sustainability modelling",
-          "Break-even sensitivity modelling",
-          "Financial risk heat map",
-          "Negotiation support insights",
-          "Written valuation opinion report",
-          "60-min strategic advisory call"
-        ]
-      }
-    ]
-  }
-}
+    key: "individual_tax_return",
+    category: "accounting_tax",
+    label: "Individual Tax Return",
+    foundation: {
+      title: "Individual Tax Return",
+      price: 99,
+      features: [
+        "Individual Tax Return Preparation & Lodgement",
+        "Income & Deduction Assessment",
+        "Medicare Levy Calculation",
+        "Private Health Insurance Rebate",
+        "Work-Related Expense Optimisation",
+        "Rental Property Schedule",
+        "Capital Gains Tax Calculation",
+        "ATO Pre-fill Data Review",
+        "Tax Offset Eligibility Check",
+      ],
+    },
+    accounting: {
+      includes: [
+        "Ongoing Tax Advisory Support",
+        "Prior Year Amendment Reviews",
+        "ATO Correspondence Management",
+        "Tax Planning Consultation",
+      ],
+      extraCount: 4,
+    },
+  },
+  {
+    key: "sole_trader_tax_return",
+    category: "accounting_tax",
+    label: "Sole Trader Tax Return",
+    foundation: {
+      title: "Sole Trader Tax Return",
+      price: 160,
+      features: [
+        "Sole Trader Tax Return Preparation",
+        "Business Income & Expense Analysis",
+        "Motor Vehicle Claims Calculation",
+        "Home Office Expense Calculation",
+        "Depreciation Schedule Preparation",
+        "BAS Reconciliation & Review",
+        "GST Reporting & Compliance",
+        "ATO Pre-fill Data Review",
+        "Business Loss Provisions Review",
+      ],
+    },
+    accounting: {
+      includes: [
+        "Monthly Bookkeeping & Reconciliation",
+        "Quarterly BAS Preparation & Lodgement",
+        "Annual Tax Return Lodgement",
+        "Tax Planning Consultation",
+      ],
+      extraCount: 6,
+    },
+  },
+  {
+    key: "bundle_tax_return",
+    category: "accounting_tax",
+    label: "Bundle Tax Return",
+    foundation: {
+      title: "Bundle Tax Return Package",
+      price: 199,
+      features: [
+        "Individual + Business Tax Return Package",
+        "Combined Income Assessment",
+        "Cross-Entity Tax Optimisation",
+        "Trust Distribution Integration",
+        "Company Dividend Integration",
+        "Capital Gains Consolidation",
+        "Multi-Entity BAS Review",
+        "ATO Compliance Review",
+        "Comprehensive Tax Planning",
+      ],
+    },
+    accounting: {
+      includes: [
+        "Multi-Entity Bookkeeping",
+        "Consolidated BAS Preparation",
+        "All Entity Tax Returns",
+        "Strategic Tax Advisory",
+      ],
+      extraCount: 6,
+    },
+  },
+  {
+    key: "tfn",
+    category: "accounting_tax",
+    label: "TFN Registration",
+    foundation: {
+      title: "TFN Registration",
+      price: 120,
+      features: [
+        "Tax File Number Application",
+        "ATO Registration & Submission",
+        "Identity Verification Assistance",
+        "TFN Notification to Employers",
+        "TFN Declaration Preparation",
+        "ABN Linking (if applicable)",
+      ],
+    },
+    accounting: {
+      includes: [
+        "Ongoing Tax Advisory Support",
+        "ATO Correspondence Management",
+        "Tax Return Preparation",
+        "Compliance Monitoring",
+      ],
+      extraCount: 4,
+    },
+  },
+  {
+    key: "rental_properties",
+    category: "accounting_tax",
+    label: "Rental Properties",
+    foundation: {
+      title: "Rental Properties",
+      price: 50,
+      features: [
+        "Investment Property Tax Schedule",
+        "Rental Income & Expense Tracking",
+        "Depreciation Schedule Preparation",
+        "Capital Gains Tax Calculation",
+        "Negative Gearing Assessment",
+        "Property Settlement Support",
+      ],
+    },
+    accounting: {
+      includes: [
+        "Ongoing Rental Property Advisory",
+        "Annual Rental Schedule Preparation",
+        "Property Portfolio Review",
+        "Capital Gains Planning",
+      ],
+      extraCount: 4,
+    },
+  },
+  {
+    key: "asic_agent",
+    category: "accounting_tax",
+    label: "ASIC Annual Review Agent",
+    foundation: {
+      title: "ASIC Annual Review",
+      price: 180,
+      features: [
+        "ASIC Annual Review Lodgement",
+        "Company Details Verification",
+        "Registered Office & Address Updates",
+        "Director & Secretary Updates",
+        "Share Structure Review",
+        "Solvency Resolution Preparation",
+        "ASIC Fee Payment Management",
+        "Compliance Deadline Monitoring",
+        "Change of Details Processing",
+      ],
+    },
+    accounting: {
+      includes: [
+        "Ongoing ASIC Compliance Monitoring",
+        "Annual Review Reminders",
+        "Change Notifications",
+        "ASIC Correspondence Management",
+      ],
+      extraCount: 4,
+    },
+  },
+  {
+    key: "company_accounting",
+    category: "accounting_tax",
+    label: "Company Accounting",
+    foundation: {
+      title: "Company Accounting Package",
+      price: 100,
+      features: [
+        "Monthly Financial Reporting",
+        "Bank & Credit Card Reconciliation",
+        "Accounts Payable Management",
+        "Accounts Receivable Management",
+        "Payroll Processing",
+        "BAS Preparation & Lodgement",
+        "Annual Financial Statements",
+        "Company Tax Return Lodgement",
+        "ASIC Annual Review",
+      ],
+    },
+    accounting: {
+      includes: [
+        "Dedicated Accountant",
+        "Cloud Accounting Software Setup",
+        "Monthly Management Reports",
+        "Quarterly Review Meetings",
+      ],
+      extraCount: 8,
+    },
+  },
+  {
+    key: "trust_accounting",
+    category: "accounting_tax",
+    label: "Trust Accounting",
+    foundation: {
+      title: "Trust Accounting Package",
+      price: 77,
+      features: [
+        "Trust Transaction Recording",
+        "Trust Distribution Calculations",
+        "Beneficiary Statements",
+        "Trust Tax Return Preparation",
+        "BAS Preparation & Lodgement",
+        "Trust Investment Reporting",
+        "Trustee Resolution Documentation",
+        "ATO Compliance Management",
+        "Year-End Financial Statements",
+      ],
+    },
+    accounting: {
+      includes: [
+        "Dedicated Trust Accountant",
+        "Cloud Accounting Setup",
+        "Quarterly Trust Reviews",
+        "Annual Distribution Planning",
+      ],
+      extraCount: 8,
+    },
+  },
+  {
+    key: "nfp_accounting",
+    category: "accounting_tax",
+    label: "NFP Accounting",
+    foundation: {
+      title: "NFP Accounting Package",
+      price: 99,
+      features: [
+        "NFP Financial Reporting",
+        "Fund & Grant Tracking",
+        "Donor Management & Receipting",
+        "ACNC Annual Information Statement",
+        "BAS Preparation & Lodgement",
+        "Payroll Processing",
+        "FBT Compliance",
+        "Budget vs Actual Reporting",
+        "Financial Audit Preparation",
+      ],
+    },
+    accounting: {
+      includes: [
+        "Dedicated NFP Accountant",
+        "Cloud Accounting Setup",
+        "Monthly Financial Reports",
+        "Grant Acquittal Support",
+      ],
+      extraCount: 8,
+    },
+  },
+
+  // ═══════════════════════════════════════════
+  // CATEGORY 3: BUSINESS ADVISORY (4 services)
+  // ═══════════════════════════════════════════
+  {
+    key: "business_plan",
+    category: "business_advisory",
+    label: "Business Plan",
+    foundation: { title: "Business Plan", price: 990, features: [] },
+    accounting: { includes: [], extraCount: 0 },
+    meta: {
+      plans: [
+        {
+          id: "startup",
+          label: "Startup",
+          subtitle: "Pre-launch or just established",
+          badge: "Pre-launch / Startup stage",
+          price: 990,
+          delivery: "5-8 business days delivery",
+          recommended: false,
+          features: [
+            "3-5 year financial projections (P&L, Cash Flow)",
+            "Market analysis & competitor research",
+            "Executive summary & business overview",
+            "Marketing & sales strategy",
+            "Professional graphic design",
+            "Unlimited revisions (30 days)",
+          ],
+        },
+        {
+          id: "growth",
+          label: "Growth",
+          subtitle: "Established and scaling operations",
+          badge: "1-3 years in business",
+          price: 1299,
+          delivery: "5-8 business days delivery",
+          recommended: true,
+          features: [
+            "3-5 year comprehensive financial projections",
+            "In-depth market & competitor analysis",
+            "Growth strategy & expansion roadmap",
+            "Marketing plan with customer acquisition",
+            "Operational & organizational structure",
+            "Premium graphic design & formatting",
+            "Unlimited revisions (30 days)",
+          ],
+        },
+        {
+          id: "established",
+          label: "Established",
+          subtitle: "Mature business seeking funding",
+          badge: "3+ years in business",
+          price: 1499,
+          delivery: "5-8 business days delivery",
+          recommended: false,
+          features: [
+            "Comprehensive 3-5 year financial projections",
+            "Historical performance analysis",
+            "Advanced market positioning & strategy",
+            "Detailed marketing & growth plan",
+            "Risk assessment & mitigation strategies",
+            "Management & operations analysis",
+            "Premium design + Pitch deck included",
+            "Unlimited revisions (30 days)",
+          ],
+        },
+      ],
+      addons: [
+        { id: "pitch_deck", label: "Investor Pitch Deck", price: 750 },
+        { id: "excel_model", label: "Excel Financial Model", price: 500 },
+        { id: "pitch_training", label: "Investor Presentation Training", price: 650 },
+        { id: "rush_delivery", label: "Rush Delivery (3-4 business days)", price: 500 },
+      ],
+    },
+  },
+  {
+    key: "business_valuation",
+    category: "business_advisory",
+    label: "Business Valuation",
+    foundation: { title: "Business Valuation", price: 1399, features: [] },
+    accounting: { includes: [], extraCount: 0 },
+    meta: {
+      plans: [
+        {
+          id: "appraisal",
+          label: "Appraisal Report",
+          subtitle: "Estimate of business value for internal use and general purposes",
+          badge: null,
+          price: 1399,
+          delivery: "7-10 business days delivery",
+          recommended: false,
+          features: [
+            "Short-form Business Appraisal Report",
+            "Estimate of business value",
+            "Industry benchmarking analysis",
+            "Pre-release discussion with experts",
+            "Business & industry risk assessment",
+          ],
+        },
+        {
+          id: "standard",
+          label: "Standard Business Valuation",
+          subtitle: "Comprehensive report for sale, divorce, disputes, or court proceedings",
+          badge: "MOST POPULAR · COURT ACCEPTED",
+          price: 3159,
+          delivery: "7-10 business days delivery",
+          recommended: true,
+          features: [
+            "Detailed Business Valuation Report",
+            "Comprehensive financial statement analysis",
+            "Detailed industry & market analysis",
+            "Pre-release discussion with experts",
+            "Risk analysis & adjustment factors",
+            "Court-acceptable documentation",
+            "Multiple valuation methodologies",
+          ],
+        },
+      ],
+    },
+  },
+  {
+    key: "business_due_diligence",
+    category: "business_advisory",
+    label: "Business Due Diligence",
+    foundation: { title: "Business Due Diligence", price: 500, features: [] },
+    accounting: { includes: [], extraCount: 0 },
+    meta: {
+      plans: [
+        {
+          id: "snapshot",
+          label: "Financial Snapshot Review",
+          subtitle: "Essential Review",
+          badge: null,
+          price: 500,
+          delivery: "3-5 business days",
+          recommended: false,
+          features: [
+            "2 year financial statement analysis",
+            "Revenue & profit trend review",
+            "Expense and margin analysis",
+            "Basic cash flow review",
+            "Working capital health check",
+            "Industry ratio comparison",
+            "Risk flag summary report",
+            "30 min strategy call",
+          ],
+        },
+        {
+          id: "comprehensive",
+          label: "Comprehensive Financial DD",
+          subtitle: "Full Analysis & Valuation",
+          badge: "RECOMMENDED",
+          price: 1500,
+          delivery: "5-7 business days",
+          recommended: true,
+          features: [
+            "3-5 year deep financial analysis",
+            "Normalised earnings adjustment (EBITDA correction)",
+            "Valuation using EBITDA multiple, revenue multiple, DCF",
+            "Tax risk exposure analysis",
+            "Owner add-backs review",
+            "Cash flow sustainability modelling",
+            "Break-even sensitivity modelling",
+            "Financial risk heat map",
+            "Negotiation support insights",
+            "Written valuation opinion report",
+            "60-min strategic advisory call",
+          ],
+        },
+      ],
+    },
+  },
+  {
+    key: "business_wealth_structuring",
+    category: "business_advisory",
+    label: "Business & Wealth Structuring",
+    foundation: { title: "Business & Wealth Structuring", price: 500, features: [] },
+    accounting: { includes: [], extraCount: 0 },
+    meta: {
+      plans: [
+        {
+          id: "essential",
+          label: "Essential Strategy Session",
+          subtitle: "60-minute expert consultation",
+          badge: null,
+          price: 500,
+          delivery: "Within 5 business days",
+          recommended: false,
+          features: [
+            "60-minute expert strategy session",
+            "Current structure analysis",
+            "Tax efficiency recommendations",
+            "Asset protection overview",
+            "Written summary & next steps",
+          ],
+        },
+        {
+          id: "comprehensive",
+          label: "Comprehensive Structuring Plan",
+          subtitle: "Full structure review & implementation roadmap",
+          badge: "RECOMMENDED",
+          price: 2500,
+          delivery: "10-15 business days",
+          recommended: true,
+          features: [
+            "Complete business structure audit",
+            "Multi-entity tax optimisation plan",
+            "Asset protection strategy",
+            "Succession & estate planning overview",
+            "Detailed implementation roadmap",
+            "2× follow-up advisory sessions",
+            "Priority ongoing support (90 days)",
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 async function seedPricing() {
   try {
     await mongoose.connect(MONGO_URI);
-
-    console.log("Clearing old pricing...");
+    console.log("🗑️  Clearing old pricing...");
     await PricingService.deleteMany({});
-
-    console.log("Seeding pricing...");
+    console.log("🌱 Seeding pricing...");
     await PricingService.insertMany(pricingData);
-
-    console.log("Pricing seeded successfully!");
+    console.log(`✅ Pricing seeded successfully! (${pricingData.length} services)`);
     process.exit();
   } catch (err) {
-    console.error(err);
+    console.error("❌ Seeding failed:", err);
     process.exit(1);
   }
 }
