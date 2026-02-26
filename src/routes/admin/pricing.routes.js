@@ -4,9 +4,13 @@ const pricingController = require('../../controllers/pricing.controller');
 
 router.get('/', pricingController.getAllServices);
 router.get('/:key', pricingController.getService);
+router.post('/reset', pricingController.resetPricing);  // BEFORE /:key
 router.post('/', pricingController.createService);
 router.put('/:key', pricingController.updateService);
 router.delete('/:key', pricingController.deleteService);
-router.post('/reset', pricingController.resetPricing);
+// router.post('/reset', pricingController.resetPricing);
+
+
+
 
 module.exports = router;

@@ -33,70 +33,57 @@ exports.getService = async (req, res) => {
 // CREATE
 exports.createService = async (req, res) => {
   try {
-    const { key, label, foundation, accounting } = req.body;
+    const { key, label, foundation, accounting, meta, category } = req.body;
 
-    if (!key || !label || !foundation?.title || foundation?.price === undefined)
-      return res.status(400).json({
-        message: 'Missing required fields',
-      });
+    if (!key || !foundation?.title || foundation?.price === undefined)
+      return res.status(400).json({ message: 'Missing required fields' });
 
     const exists = await PricingService.findOne({ key });
     if (exists)
-      return res.status(409).json({
-        message: 'Service key already exists',
-      });
+      return res.status(409).json({ message: 'Service key already exists' });
 
     const service = await PricingService.create({
       key,
       label,
       foundation,
       accounting,
+      meta: meta || null,
+      category: category || null,
     });
 
-    res.status(201).json({
-      message: 'Service created successfully',
-      service,
-    });
+    res.status(201).json({ message: 'Service created successfully', service });
   } catch (err) {
-    res.status(500).json({
-      message: 'Failed to create service',
-      error: err.message,
-    });
+    res.status(500).json({ message: 'Failed to create service', error: err.message });
   }
 };
 
 // UPDATE
 exports.updateService = async (req, res) => {
   try {
-    const { label, foundation, accounting } = req.body;
+    const { label, foundation, accounting, meta, category } = req.body;
+
+    const updateFields = {};
+    if (label) updateFields.label = label;
+    if (foundation) updateFields.foundation = foundation;
+    if (accounting) updateFields.accounting = accounting;
+    if (meta !== undefined) updateFields.meta = meta;
+    if (category) updateFields.category = category;
 
     const service = await PricingService.findOneAndUpdate(
       { key: req.params.key },
-      {
-        $set: {
-          ...(label && { label }),
-          ...(foundation && { foundation }),
-          ...(accounting && { accounting }),
-        },
-      },
+      { $set: updateFields },
       { new: true, runValidators: true }
     );
 
-    if (!service) {
+    if (!service)
       return res.status(404).json({ message: 'Service not found' });
-    }
 
-    res.json({
-      message: 'Service updated successfully',
-      service,
-    });
+    res.json({ message: 'Service updated successfully', service });
   } catch (err) {
-    res.status(500).json({
-      message: 'Failed to update service',
-      error: err.message,
-    });
+    res.status(500).json({ message: 'Failed to update service', error: err.message });
   }
 };
+
 
 
 // DELETE
