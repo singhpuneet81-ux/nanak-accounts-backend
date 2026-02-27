@@ -44,53 +44,67 @@ const stripeWebhook = asyncHandler(async (req, res) => {
 
   try {
     switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object;
-        const submissionId = session.metadata?.submission_id;
+     case "checkout.session.completed": {
+  console.log("✅ checkout.session.completed triggered");
 
-        if (submissionId) {
-          const submission = await Submission.findById(submissionId);
+  const session = event.data.object;
+  console.log("Session ID:", session.id);
+  console.log("Metadata:", session.metadata);
 
-          if (submission) {
-            // 🔥 Prevent duplicate processing
-            if (submission.paymentStatus === "paid") break;
+  const submissionId = session.metadata?.submission_id;
+  console.log("Submission ID from metadata:", submissionId);
 
-            submission.paymentStatus = "paid";
-            submission.paymentIntentId =
-              session.payment_intent || submission.paymentIntentId;
-            submission.stripeCheckoutSessionId =
-              session.id || submission.stripeCheckoutSessionId;
-            submission.paymentCompletedAt = new Date();
+  if (!submissionId) {
+    console.log("❌ No submissionId in metadata");
+    break;
+  }
 
-            await addActivity(submission, {
-              action: "payment",
-              description: `Payment received — $${(session.amount_total || 0) / 100}`,
-              doneBy: "Stripe",
-              details: {
-                event: event.type,
-                amount: (session.amount_total || 0) / 100,
-                currency: session.currency,
-                payment_intent: session.payment_intent,
-              },
-            });
+  const submission = await Submission.findById(submissionId);
+  console.log("Submission found:", !!submission);
 
-            // 🔥 Send User Payment Success Email
-            try {
-              await sendPaymentSuccessEmailToUser(submission);
-            } catch (e) {
-              console.warn("User payment email failed:", e.message);
-            }
+  if (!submission) {
+    console.log("❌ Submission not found in DB");
+    break;
+  }
 
-            // 🔥 Notify Admins
-            try {
-              await notifyAdminPaymentReceived(submission);
-            } catch (e) {
-              console.warn("Admin payment email failed:", e.message);
-            }
-          }
-        }
-        break;
-      }
+  console.log("Current paymentStatus:", submission.paymentStatus);
+
+  if (submission.paymentStatus === "paid") {
+    console.log("⚠ Already paid — skipping");
+    break;
+  }
+
+  console.log("💰 Marking as paid");
+
+  submission.paymentStatus = "paid";
+  submission.paymentIntentId =
+    session.payment_intent || submission.paymentIntentId;
+  submission.stripeCheckoutSessionId =
+    session.id || submission.stripeCheckoutSessionId;
+  submission.paymentCompletedAt = new Date();
+
+  await submission.save();
+
+  console.log("📧 Sending user payment success email...");
+
+  try {
+    await sendPaymentSuccessEmailToUser(submission);
+    console.log("✅ User payment email sent");
+  } catch (e) {
+    console.error("❌ User payment email failed:", e);
+  }
+
+  console.log("📧 Sending admin payment email...");
+
+  try {
+    await notifyAdminPaymentReceived(submission);
+    console.log("✅ Admin payment email sent");
+  } catch (e) {
+    console.error("❌ Admin payment email failed:", e);
+  }
+
+  break;
+}
 
       case "payment_intent.succeeded": {
         const pi = event.data.object;
