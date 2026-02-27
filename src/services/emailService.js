@@ -1,5 +1,5 @@
 const { sendMail } = require("./mailer");
-const { generatePaymentReceipt } = require("../services/receiptGenerator.js");
+const { generatePaymentReceipt } = require("./receiptGenerator.js");
 
 async function sendSubmissionConfirmationToUser(submission) {
   const subject = `Submission received - ${submission.orderNumber}`;

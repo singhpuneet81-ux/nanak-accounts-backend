@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const { generatePaymentReceipt } = require("../services/receiptGenerator.js");
+const { generatePaymentReceipt } = require("./receiptGenerator.js");
 // const transporter = nodemailer.createTransport({
 //   host: process.env.MAIL_HOST || 'smtp.office365.com',
 //   port: Number(process.env.MAIL_PORT || 587),
@@ -69,6 +69,7 @@ const notifyAdminNewSubmission = async (submission) => {
 
 const sendPaymentSuccessEmailToUser = async (submission) => {
   console.log("📧 [MAIL START] Payment email for:", submission.orderNumber);
+  
 
   // 1️⃣ Generate PDF
   const receiptPath = await generatePaymentReceipt(submission);

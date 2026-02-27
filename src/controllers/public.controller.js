@@ -312,13 +312,14 @@ const checkoutSubmit = asyncHandler(async (req, res) => {
     mode: "payment",
 
     // ✅ IMPORTANT: Put metadata on PaymentIntent too (for payment_intent.succeeded)
-    payment_intent_data: {
-      metadata: {
-        submission_id: String(submission._id),
-        service_key: serviceKey,
-        order_number: orderNumber,
-      },
-    },
+ payment_intent_data: {
+  receipt_email: primaryEmail,
+  metadata: {
+    submission_id: String(submission._id),
+    service_key: serviceKey,
+    order_number: orderNumber,
+  },
+},
 
     // metadata on session (fine to keep)
     metadata: {
@@ -385,11 +386,14 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
   customer_email: customerEmail,
   mode: "payment",
 
-  payment_intent_data: {
-    metadata: {
-      submission_id: String(submission._id),
-    },
+ payment_intent_data: {
+  receipt_email: primaryEmail,
+  metadata: {
+    submission_id: String(submission._id),
+    service_key: serviceKey,
+    order_number: orderNumber,
   },
+},
 
   metadata: {
     submission_id: String(submission._id),
