@@ -47,6 +47,7 @@ attachments: [{
   path: path.resolve("src/assets/logo-nanak.webp"),
   cid: "nanakLogo"
 }]
+
 const notifyAdminNewSubmission = async (submission) => {
   console.log("📩 [ADMIN MAIL START] New submission:", submission.orderNumber);
 
@@ -62,33 +63,29 @@ const notifyAdminNewSubmission = async (submission) => {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
-<body style="margin:0;padding:0;background-color:#f4f6f9;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f9;padding:32px 16px;">
+<body style="margin:0;padding:0;background-color:#f4f6f9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f9;padding:30px 0;">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-          
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%); padding:32px 40px; text-align:center;">
+            <td style="background:linear-gradient(135deg,#1e3a5f,#2d6cbe);padding:30px;text-align:center;">
               <img src="cid:nanakLogo" alt="Nanak Accountants" width="160" style="margin-bottom:16px;" />
-              <h1 style="color:#ffffff;margin:0;font-size:22px;font-weight:700;letter-spacing:-0.3px;">
-                New Submission Received
-              </h1>
-              <p style="color:rgba(255,255,255,0.75);margin:8px 0 0;font-size:14px;">
-                A new order has been placed and is awaiting processing
-              </p>
+              <h1 style="color:#ffffff;font-size:22px;margin:0;">New Submission Received</h1>
+              <p style="color:#cbe0ff;font-size:14px;margin:8px 0 0;">A new order has been placed and is awaiting processing</p>
             </td>
           </tr>
 
-          <!-- Order Badge -->
+          <!-- Order Number -->
           <tr>
-            <td style="padding:24px 40px 0;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef4fb;border-radius:12px;border:1px solid #d0e1f4;">
+            <td style="padding:24px 30px 0;">
+              <table width="100%" style="background:#eef4fb;border-radius:8px;padding:14px 20px;">
                 <tr>
-                  <td style="padding:16px 20px;text-align:center;">
-                    <p style="margin:0;font-size:12px;color:#5a7da6;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Order Number</p>
-                    <p style="margin:4px 0 0;font-size:24px;color:#1e3a5f;font-weight:800;letter-spacing:-0.5px;">${submission.orderNumber}</p>
+                  <td>
+                    <p style="margin:0;font-size:12px;color:#5a7a9b;text-transform:uppercase;">Order Number</p>
+                    <p style="margin:4px 0 0;font-size:18px;font-weight:bold;color:#1e3a5f;">${submission.orderNumber}</p>
                   </td>
                 </tr>
               </table>
@@ -97,12 +94,12 @@ const notifyAdminNewSubmission = async (submission) => {
 
           <!-- Service -->
           <tr>
-            <td style="padding:24px 40px 0;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius:12px; border:1px solid #bbf7d0;">
+            <td style="padding:16px 30px 0;">
+              <table width="100%" style="background:#eef4fb;border-radius:8px;padding:14px 20px;">
                 <tr>
-                  <td style="padding:16px 20px;text-align:center;">
-                    <p style="margin:0;font-size:12px;color:#15803d;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Service</p>
-                    <p style="margin:4px 0 0;font-size:18px;color:#166534;font-weight:700;">${submission.serviceName}</p>
+                  <td>
+                    <p style="margin:0;font-size:12px;color:#5a7a9b;text-transform:uppercase;">Service</p>
+                    <p style="margin:4px 0 0;font-size:16px;font-weight:bold;color:#1e3a5f;">${submission.serviceName}</p>
                   </td>
                 </tr>
               </table>
@@ -111,71 +108,55 @@ const notifyAdminNewSubmission = async (submission) => {
 
           <!-- Customer Details -->
           <tr>
-            <td style="padding:24px 40px;">
-              <h2 style="margin:0 0 16px;font-size:15px;color:#64748b;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;border-bottom:2px solid #e2e8f0;padding-bottom:8px;">
-                Customer Details
-              </h2>
+            <td style="padding:24px 30px 0;">
+              <h2 style="font-size:16px;color:#1e3a5f;margin:0 0 12px;border-bottom:2px solid #eef4fb;padding-bottom:8px;">Customer Details</h2>
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="padding:12px 16px;background:#f8fafc;border-radius:8px;margin-bottom:8px;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td width="36" valign="top" style="padding-right:12px;">
-                          <div style="width:36px;height:36px;background:#e0e7ff;border-radius:8px;text-align:center;line-height:36px;font-size:16px;">👤</div>
-                        </td>
-                        <td>
-                          <p style="margin:0;font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Full Name</p>
-                          <p style="margin:2px 0 0;font-size:16px;color:#1e293b;font-weight:600;">${submission.customerName}</p>
-                        </td>
-                      </tr>
-                    </table>
+                  <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;">
+                    <table><tr>
+                      <td style="font-size:22px;padding-right:12px;vertical-align:top;">👤</td>
+                      <td>
+                        <p style="margin:0;font-size:11px;color:#8899aa;text-transform:uppercase;">Full Name</p>
+                        <p style="margin:2px 0 0;font-size:15px;color:#1e3a5f;font-weight:600;">${submission.customerName}</p>
+                      </td>
+                    </tr></table>
                   </td>
                 </tr>
-                <tr><td style="height:8px;"></td></tr>
                 <tr>
-                  <td style="padding:12px 16px;background:#f8fafc;border-radius:8px;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td width="36" valign="top" style="padding-right:12px;">
-                          <div style="width:36px;height:36px;background:#fce7f3;border-radius:8px;text-align:center;line-height:36px;font-size:16px;">📧</div>
-                        </td>
-                        <td>
-                          <p style="margin:0;font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Email</p>
-                          <p style="margin:2px 0 0;font-size:16px;color:#1e293b;font-weight:600;">${submission.email}</p>
-                        </td>
-                      </tr>
-                    </table>
+                  <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;">
+                    <table><tr>
+                      <td style="font-size:22px;padding-right:12px;vertical-align:top;">📧</td>
+                      <td>
+                        <p style="margin:0;font-size:11px;color:#8899aa;text-transform:uppercase;">Email</p>
+                        <p style="margin:2px 0 0;font-size:15px;color:#1e3a5f;font-weight:600;">${submission.email}</p>
+                      </td>
+                    </tr></table>
                   </td>
                 </tr>
-                <tr><td style="height:8px;"></td></tr>
                 <tr>
-                  <td style="padding:12px 16px;background:#f8fafc;border-radius:8px;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td width="36" valign="top" style="padding-right:12px;">
-                          <div style="width:36px;height:36px;background:#e0f2fe;border-radius:8px;text-align:center;line-height:36px;font-size:16px;">📱</div>
-                        </td>
-                        <td>
-                          <p style="margin:0;font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Phone</p>
-                          <p style="margin:2px 0 0;font-size:16px;color:#1e293b;font-weight:600;">${submission.phone}</p>
-                        </td>
-                      </tr>
-                    </table>
+                  <td style="padding:10px 0;">
+                    <table><tr>
+                      <td style="font-size:22px;padding-right:12px;vertical-align:top;">📱</td>
+                      <td>
+                        <p style="margin:0;font-size:11px;color:#8899aa;text-transform:uppercase;">Phone</p>
+                        <p style="margin:2px 0 0;font-size:15px;color:#1e3a5f;font-weight:600;">${submission.phone}</p>
+                      </td>
+                    </tr></table>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- Amount -->
+          <!-- Total Amount -->
           <tr>
-            <td style="padding:0 40px 32px;">
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#1e3a5f 0%,#2d5a8e 100%);border-radius:12px;">
+            <td style="padding:24px 30px;">
+              <table width="100%" style="background:linear-gradient(135deg,#1e3a5f,#2d6cbe);border-radius:10px;padding:20px;text-align:center;">
                 <tr>
-                  <td style="padding:20px;text-align:center;">
-                    <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Total Amount</p>
-                    <p style="margin:6px 0 0;font-size:36px;color:#ffffff;font-weight:800;letter-spacing:-1px;">$${submission.amount}</p>
-                    <p style="margin:4px 0 0;font-size:12px;color:rgba(255,255,255,0.5);">inc. GST</p>
+                  <td>
+                    <p style="margin:0;font-size:12px;color:#cbe0ff;text-transform:uppercase;">Total Amount</p>
+                    <p style="margin:6px 0 2px;font-size:32px;font-weight:bold;color:#ffffff;">$${submission.amount}</p>
+                    <p style="margin:0;font-size:12px;color:#a8ccf0;">inc. GST</p>
                   </td>
                 </tr>
               </table>
@@ -184,13 +165,9 @@ const notifyAdminNewSubmission = async (submission) => {
 
           <!-- Footer -->
           <tr>
-            <td style="background:#f8fafc;padding:20px 40px;text-align:center;border-top:1px solid #e2e8f0;">
-              <p style="margin:0;font-size:12px;color:#94a3b8;">
-                This is an automated notification from <strong style="color:#64748b;">Nanak Accountants</strong>
-              </p>
-              <p style="margin:4px 0 0;font-size:11px;color:#cbd5e1;">
-                © ${new Date().getFullYear()} Nanak Accountants. All rights reserved.
-              </p>
+            <td style="background:#f8f9fb;padding:20px 30px;text-align:center;border-top:1px solid #eee;">
+              <p style="margin:0;font-size:12px;color:#999;">This is an automated notification from Nanak Accountants</p>
+              <p style="margin:6px 0 0;font-size:11px;color:#bbb;">© ${new Date().getFullYear()} Nanak Accountants. All rights reserved.</p>
             </td>
           </tr>
 
@@ -201,13 +178,10 @@ const notifyAdminNewSubmission = async (submission) => {
 </body>
 </html>
       `,
-
-      
       attachments: [
         {
-
           filename: "logo-nanak.webp",
-          path: path.join(__dirname, "assets", "logo-nanak.webp"),
+          path: path.resolve("src/assets/logo-nanak.webp"),
           cid: "nanakLogo",
         },
       ],
@@ -221,6 +195,7 @@ const notifyAdminNewSubmission = async (submission) => {
     throw error;
   }
 };
+
 
 
 async function sendPaymentSuccessEmailToUser(submission) {
