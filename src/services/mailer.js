@@ -39,6 +39,14 @@ const transporter = require("nodemailer").createTransport({
 });
 
 
+const path = require("path");
+
+// Replace the attachments section with:
+attachments: [{
+  filename: "logo-nanak.webp",
+  path: path.resolve("src/assets/logo-nanak.webp"),
+  cid: "nanakLogo"
+}]
 const notifyAdminNewSubmission = async (submission) => {
   console.log("📩 [ADMIN MAIL START] New submission:", submission.orderNumber);
 
@@ -193,8 +201,11 @@ const notifyAdminNewSubmission = async (submission) => {
 </body>
 </html>
       `,
+
+      
       attachments: [
         {
+
           filename: "logo-nanak.webp",
           path: path.join(__dirname, "assets", "logo-nanak.webp"),
           cid: "nanakLogo",
