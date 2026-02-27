@@ -6,6 +6,7 @@ const { generateOrderNumber } = require("../utils/orderNumber");
 const { getServiceName } = require("../utils/serviceMap");
 const { notifyStaffNewSubmission } = require("../services/emailService");
 const { getStripe } = require("../config/stripe");
+const { notifyAdminNewSubmission } = require("../services/mailer");
 
 const submitFormValidators = [
   body("serviceKey").isString().notEmpty(),
@@ -290,10 +291,33 @@ const checkoutSubmit = asyncHandler(async (req, res) => {
     ],
   });
 
+console.log("📧 Starting admin email notification...");
+console.log("Submission ID:", submission._id);
+console.log("Sending to email:", submission.email);
+
 try {
-  await notifyAdminNewSubmission(submission);
+  const mailResult = await notifyAdminNewSubmission(submission);
+  console.log("📧 Starting admin email notification...");
+console.log("Submission ID:", submission._id);
+console.log("Sending to email:", submission.email);
+
+try {
+  const mailResult = await notifyAdminNewSubmission(submission);
+
+  console.log("✅ Admin email function executed successfully.");
+  console.log("📨 Mail result:", mailResult);
 } catch (e) {
-  console.warn("Admin email failed:", e.message);
+  console.error("❌ Admin email failed!");
+  console.error("Error message:", e.message);
+  console.error("Full error:", e);
+}(submission);
+
+  console.log("✅ Admin email function executed successfully.");
+  console.log("📨 Mail result:", mailResult);
+} catch (e) {
+  console.error("❌ Admin email failed!");
+  console.error("Error message:", e.message);
+  console.error("Full error:", e);
 }
   const stripe = getStripe();
 
