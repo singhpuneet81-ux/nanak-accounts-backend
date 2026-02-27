@@ -31,7 +31,12 @@ const upload = multer({
 router.post('/submit-form', submitFormValidators, validate, submitForm);
 
 // Checkout flow endpoints (compatible with "API_DOCUMENTATION.md")
-router.post('/checkout/submit', upload.any(), checkoutSubmit);
+// router.post('/checkout/submit', upload.any(), checkoutSubmit);
 router.post('/create-checkout-session', createCheckoutSession);
 
+
+router.post('/checkout/submit', upload.any(), (req, res, next) => {
+  console.log("🚀 /checkout/submit route HIT");
+  next();
+}, checkoutSubmit);
 module.exports = router;
