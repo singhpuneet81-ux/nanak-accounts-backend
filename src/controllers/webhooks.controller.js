@@ -45,83 +45,55 @@ const stripeWebhook = asyncHandler(async (req, res) => {
 
   try {
     switch (event.type) {
-     case "checkout.session.completed": {
+ case "checkout.session.completed": {
   console.log("✅ checkout.session.completed triggered");
+  break;
+}
 
-  const session = event.data.object;
-  console.log("Session ID:", session.id);
-  console.log("Metadata:", session.metadata);
+ case "payment_intent.succeeded": {
+  console.log("💰 payment_intent.succeeded triggered");
 
-  const submissionId = session.metadata?.submission_id;
-  console.log("Submission ID from metadata:", submissionId);
+  const pi = event.data.object;
+  const submissionId = pi.metadata?.submission_id;
 
   if (!submissionId) {
-    console.log("❌ No submissionId in metadata");
+    console.log("❌ No submission_id in metadata");
     break;
   }
 
   const submission = await Submission.findById(submissionId);
-  console.log("Submission found:", !!submission);
 
   if (!submission) {
-    console.log("❌ Submission not found in DB");
+    console.log("❌ Submission not found");
     break;
   }
-
-  console.log("Current paymentStatus:", submission.paymentStatus);
 
   if (submission.paymentStatus === "paid") {
-    console.log("⚠ Already paid — skipping");
+    console.log("⚠ Already processed — skipping");
     break;
   }
 
-  console.log("💰 Marking as paid");
-
   submission.paymentStatus = "paid";
-  submission.paymentIntentId =
-    session.payment_intent || submission.paymentIntentId;
-  submission.stripeCheckoutSessionId =
-    session.id || submission.stripeCheckoutSessionId;
+  submission.paymentIntentId = pi.id;
   submission.paymentCompletedAt = new Date();
 
   await submission.save();
 
-  console.log("📧 Sending user payment success email...");
+  await addActivity(submission, {
+    action: "payment",
+    description: `Payment received — $${(pi.amount_received || 0) / 100}`,
+    doneBy: "Stripe",
+    details: { event: event.type, payment_intent: pi.id },
+  });
 
-  try {
-    await sendPaymentSuccessEmailToUser(submission);
-    console.log("✅ User payment email sent");
-  } catch (e) {
-    console.error("❌ User payment email failed:", e);
-  }
+  console.log("📧 Sending user payment email...");
+  await sendPaymentSuccessEmailToUser(submission);
 
   console.log("📧 Sending admin payment email...");
-
-  try {
-    await notifyAdminPaymentReceived(submission);
-    console.log("✅ Admin payment email sent");
-  } catch (e) {
-    console.error("❌ Admin payment email failed:", e);
-  }
+  await notifyAdminPaymentReceived(submission);
 
   break;
 }
-
-      case "payment_intent.succeeded": {
-        const pi = event.data.object;
-        const submission = await Submission.findOne({ paymentIntentId: pi.id });
-        if (submission) {
-          submission.paymentStatus = "paid";
-          await addActivity(submission, {
-            action: "payment",
-            description: `Payment received — $${(pi.amount_received || 0) / 100}`,
-            doneBy: "Stripe",
-            details: { event: event.type, payment_intent: pi.id },
-          });
-        }
-        break;
-      }
-
       case "payment_intent.payment_failed": {
         const pi = event.data.object;
         const submission = await Submission.findOne({ paymentIntentId: pi.id });

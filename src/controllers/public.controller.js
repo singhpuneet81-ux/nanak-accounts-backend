@@ -201,10 +201,10 @@ const checkoutSubmit = asyncHandler(async (req, res) => {
       .json({ success: false, message: "pricing.total required" });
   }
 
-  // 🔥 Resolve primary email dynamically
+  // ✅ Resolve primary email dynamically
   let primaryEmail = resolvePrimaryEmail(customer);
 
-  // 🔥 Bare Trust fallback logic
+  // ✅ Bare Trust fallback logic
   if (!primaryEmail && serviceKey === "bare_trust") {
     primaryEmail =
       customer.email ||
@@ -214,7 +214,7 @@ const checkoutSubmit = asyncHandler(async (req, res) => {
         : null);
   }
 
-  // 🔥 Absolute fallback (system placeholder)
+  // ✅ Absolute fallback (system placeholder)
   if (!primaryEmail && serviceKey === "bare_trust") {
     primaryEmail = "baretrust@system.local";
   }
@@ -226,22 +226,11 @@ const checkoutSubmit = asyncHandler(async (req, res) => {
     });
   }
 
-  if (!primaryEmail) {
-    return res.status(400).json({
-      success: false,
-      message: "customer.email required",
-    });
-  }
-
-  // 🔥 Resolve primary phone dynamically
+  // ✅ Resolve primary phone dynamically
   let primaryPhone = resolvePrimaryPhone(customer);
+  if (!primaryPhone) primaryPhone = "0000000000";
 
-  // 🔥 If phone not found, assign system fallback
-  if (!primaryPhone) {
-    primaryPhone = "0000000000"; // fallback to satisfy mongoose required field
-  }
-
-  // 🔥 Resolve customer name dynamically
+  // ✅ Resolve customer name dynamically (safer concatenation)
   const customerName =
     [customer.firstName, customer.lastName].filter(Boolean).join(" ") ||
     [customer.appointorFirstName, customer.appointorLastName]
@@ -251,9 +240,9 @@ const checkoutSubmit = asyncHandler(async (req, res) => {
       .filter(Boolean)
       .join(" ") ||
     customer.directors?.[0]?.fullName ||
-    customer.iaCommitteeMembers?.[0]?.firstName +
-      " " +
-      customer.iaCommitteeMembers?.[0]?.lastName ||
+    [customer.iaCommitteeMembers?.[0]?.firstName, customer.iaCommitteeMembers?.[0]?.lastName]
+      .filter(Boolean)
+      .join(" ") ||
     payload.customerName ||
     "Customer";
 
@@ -291,52 +280,53 @@ const checkoutSubmit = asyncHandler(async (req, res) => {
     ],
   });
 
-console.log("📧 Starting admin email notification...");
-console.log("Submission ID:", submission._id);
-console.log("Sending to email:", submission.email);
-
-try {
-  const mailResult = await notifyAdminNewSubmission(submission);
+  // ✅ Admin email (clean + single call)
   console.log("📧 Starting admin email notification...");
-console.log("Submission ID:", submission._id);
-console.log("Sending to email:", submission.email);
+  console.log("Submission ID:", submission._id);
+  console.log("Sending to email:", submission.email);
 
-try {
-  const mailResult = await notifyAdminNewSubmission(submission);
+  try {
+    const mailResult = await notifyAdminNewSubmission(submission);
+    console.log("✅ Admin email sent successfully");
+    console.log("📨 Mail result:", mailResult);
+  } catch (e) {
+    console.error("❌ Admin email failed");
+    console.error("Error message:", e.message);
+  }
 
-  console.log("✅ Admin email function executed successfully.");
-  console.log("📨 Mail result:", mailResult);
-} catch (e) {
-  console.error("❌ Admin email failed!");
-  console.error("Error message:", e.message);
-  console.error("Full error:", e);
-}(submission);
-
-  console.log("✅ Admin email function executed successfully.");
-  console.log("📨 Mail result:", mailResult);
-} catch (e) {
-  console.error("❌ Admin email failed!");
-  console.error("Error message:", e.message);
-  console.error("Full error:", e);
-}
   const stripe = getStripe();
 
   // Use fixed production frontend URL
   const BASE_URL = "https://online.nanakaccountants.com.au";
 
   console.log("========== CHECKOUT DEBUG START ==========");
-
   console.log("Content-Type:", req.headers["content-type"]);
-
   console.log("req.body keys:", Object.keys(req.body || {}));
   console.log("Raw req.body.payload:", req.body.payload);
-
   console.log("Files received:", req.files ? req.files.length : 0);
   console.log("req.files:", req.files);
-
   console.log("========== CHECKOUT DEBUG END ==========");
+
   const session = await stripe.checkout.sessions.create({
     customer_email: primaryEmail,
+    mode: "payment",
+
+    // ✅ IMPORTANT: Put metadata on PaymentIntent too (for payment_intent.succeeded)
+    payment_intent_data: {
+      metadata: {
+        submission_id: String(submission._id),
+        service_key: serviceKey,
+        order_number: orderNumber,
+      },
+    },
+
+    // metadata on session (fine to keep)
+    metadata: {
+      submission_id: String(submission._id),
+      service_key: serviceKey,
+      order_number: orderNumber,
+    },
+
     line_items: [
       {
         price_data: {
@@ -350,30 +340,21 @@ try {
         quantity: 1,
       },
     ],
-    mode: "payment",
 
-    // Updated URLs (as requested)
     success_url: `${BASE_URL}/payment-success`,
     cancel_url: `${BASE_URL}/payment-failure`,
-
-    metadata: {
-      submission_id: String(submission._id),
-      service_key: serviceKey,
-      order_number: orderNumber,
-    },
   });
 
   submission.stripeCheckoutSessionId = session.id;
   await submission.save();
 
-  res.json({
+  return res.json({
     success: true,
     submissionId: submission._id,
     stripeCheckoutUrl: session.url,
     stripeSessionId: session.id,
   });
 });
-
 const createCheckoutSession = asyncHandler(async (req, res) => {
   try {
     const { submissionId, amount, currency, serviceName, customerEmail } =
@@ -400,28 +381,37 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
     // Your production domain
     const BASE_URL = "https://online.nanakaccountants.com.au";
 
-    const session = await stripe.checkout.sessions.create({
-      customer_email: customerEmail,
-      line_items: [
-        {
-          price_data: {
-            currency: (currency || process.env.CURRENCY || "aud").toLowerCase(),
-            unit_amount: Math.round(Number(amount) * 100), // Stripe expects cents
-            product_data: {
-              name: serviceName || submission.serviceName,
-              description: `Nanak Accounts - ${serviceName || submission.serviceName}`,
-            },
-          },
-          quantity: 1,
+   const session = await stripe.checkout.sessions.create({
+  customer_email: customerEmail,
+  mode: "payment",
+
+  payment_intent_data: {
+    metadata: {
+      submission_id: String(submission._id),
+    },
+  },
+
+  metadata: {
+    submission_id: String(submission._id),
+  },
+
+  line_items: [
+    {
+      price_data: {
+        currency: (currency || process.env.CURRENCY || "aud").toLowerCase(),
+        unit_amount: Math.round(Number(amount) * 100),
+        product_data: {
+          name: serviceName || submission.serviceName,
+          description: `Nanak Accounts - ${serviceName || submission.serviceName}`,
         },
-      ],
-      mode: "payment",
-      success_url: `${BASE_URL}/payment-success`,
-      cancel_url: `${BASE_URL}/payment-failure`,
-      metadata: {
-        submission_id: String(submission._id),
       },
-    });
+      quantity: 1,
+    },
+  ],
+
+  success_url: `${BASE_URL}/payment-success`,
+  cancel_url: `${BASE_URL}/payment-failure`,
+});
 
     // Save session ID to submission
     submission.stripeCheckoutSessionId = session.id;
