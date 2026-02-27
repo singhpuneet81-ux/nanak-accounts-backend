@@ -6,10 +6,7 @@ const { generateOrderNumber } = require("../utils/orderNumber");
 const { getServiceName } = require("../utils/serviceMap");
 const { notifyStaffNewSubmission } = require("../services/emailService");
 const { getStripe } = require("../config/stripe");
-// const {
-//   sendSubmissionConfirmationToUser,
-//   notifyAdminNewSubmission,
-// } = require("../services/emailService");
+
 const submitFormValidators = [
   body("serviceKey").isString().notEmpty(),
   body("customerName").isString().notEmpty(),
@@ -19,12 +16,7 @@ const submitFormValidators = [
   body("amount").isNumeric(),
 ];
 
-const {
-  sendSubmissionConfirmationToUser,
-  notifyAdminNewSubmission,
-  sendPaymentSuccessEmailToUser,
-  notifyAdminPaymentReceived,
-} = require("../services/emailService");
+
 
 const submitForm = asyncHandler(async (req, res) => {
   const {
@@ -298,21 +290,11 @@ const checkoutSubmit = asyncHandler(async (req, res) => {
     ],
   });
 
-  // ✅ If free consultation (total = 0), skip Stripe
- if (Number(pricing.total) === 0) {
-  try {
-    await notifyAdminNewSubmission(submission);
-  } catch (e) {
-    console.warn("Admin email failed:", e.message);
-  }
-
-  return res.json({
-    success: true,
-    submissionId: submission._id,
-    message: "Form submitted successfully",
-  });
+try {
+  await notifyAdminNewSubmission(submission);
+} catch (e) {
+  console.warn("Admin email failed:", e.message);
 }
-
   const stripe = getStripe();
 
   // Use fixed production frontend URL
