@@ -72,7 +72,7 @@ const notifyAdminNewSubmission = async (submission) => {
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#1e3a5f,#2d6cbe);padding:30px;text-align:center;">
-              <img src="cid:nanakLogo" alt="Nanak Accountants" width="160" style="margin-bottom:16px;" />
+              <img src="https://nanak-accounts-backend.onrender.com/assets/logo-nanak.webp" alt="Nanak Accountants" width="160" style="margin-bottom:16px;" />
               <h1 style="color:#ffffff;font-size:22px;margin:0;">New Submission Received</h1>
               <p style="color:#cbe0ff;font-size:14px;margin:8px 0 0;">A new order has been placed and is awaiting processing</p>
             </td>
@@ -178,13 +178,6 @@ const notifyAdminNewSubmission = async (submission) => {
 </body>
 </html>
       `,
-      attachments: [
-        {
-          filename: "logo-nanak.webp",
-          path: path.resolve("src/assets/logo-nanak.webp"),
-          cid: "nanakLogo",
-        },
-      ],
     });
 
     console.log("✅ [ADMIN MAIL SENT]");
@@ -195,6 +188,7 @@ const notifyAdminNewSubmission = async (submission) => {
     throw error;
   }
 };
+
 
 
 
