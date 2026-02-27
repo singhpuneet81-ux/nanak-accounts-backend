@@ -67,78 +67,43 @@ const notifyAdminNewSubmission = async (submission) => {
   }
 };
 
-const sendPaymentSuccessEmailToUser = async (submission) => {
-  console.log("📧 [MAIL START] Payment email for:", submission.orderNumber);
-  
+async function sendPaymentSuccessEmailToUser(submission) {
+  console.log("📩 [USER MAIL] Preparing payment success email...");
+  console.log("📩 [USER MAIL] To:", submission.email);
 
-  // 1️⃣ Generate PDF
-  const receiptPath = await generatePaymentReceipt(submission);
-  console.log("📎 [PDF GENERATED]", receiptPath);
+  // 1) Generate PDF Buffer
+  const pdfBuffer = await generateReceiptPdf(submission, {
+    paymentIntentId: submission.paymentIntentId,
+    currency: "aud",
+  });
 
-  try {
-    const info = await transporter.sendMail({
-      from: `"Nanak Accountants" <${process.env.MAIL_USER}>`,
-      to: submission.email,
-      subject: "Payment Successful – Nanak Accountants",
-      html: `
-        <div style="font-family: Arial, sans-serif; background:#f5f5f5; padding:30px;">
-          <div style="max-width:600px; background:white; padding:30px; border-radius:8px;">
-            
-            <h2 style="color:#1a237e;">Payment Successful 🎉</h2>
-            
-            <p>Hi <strong>${submission.customerName}</strong>,</p>
+  console.log("📎 [USER MAIL] PDF generated. Size:", pdfBuffer.length, "bytes");
 
-            <p>We have successfully received your payment.</p>
+  // 2) Send Email with attachment
+  const info = await transporter.sendMail({
+    from: process.env.MAIL_FROM || "Info@nanakaccountants.com.au",
+    to: submission.email,
+    subject: `Payment Received - ${submission.orderNumber}`,
+    html: `
+      <p>Hi ${submission.customerName || "Customer"},</p>
+      <p>Your payment has been received successfully for <b>${submission.serviceName}</b>.</p>
+      <p><b>Order:</b> ${submission.orderNumber}<br/>
+         <b>Amount:</b> $${Number(submission.amount || 0).toFixed(2)}</p>
+      <p>Please find your receipt/invoice attached as a PDF.</p>
+      <p>Thanks,<br/>Nanak Accountants</p>
+    `,
+    attachments: [
+      {
+        filename: `Receipt-${submission.orderNumber}.pdf`,
+        content: pdfBuffer,
+        contentType: "application/pdf",
+      },
+    ],
+  });
 
-            <table style="width:100%;">
-              <tr>
-                <td><strong>Order Number:</strong></td>
-                <td>${submission.orderNumber}</td>
-              </tr>
-              <tr>
-                <td><strong>Service:</strong></td>
-                <td>${submission.serviceName}</td>
-              </tr>
-              <tr>
-                <td><strong>Amount Paid:</strong></td>
-                <td>$${submission.amount}</td>
-              </tr>
-            </table>
-
-            <br/>
-            <p>Your receipt is attached to this email.</p>
-
-            <br/>
-            <p>Regards,<br/>
-            <strong>Nanak Accountants Team</strong></p>
-
-          </div>
-        </div>
-      `,
-      attachments: [
-        {
-          filename: `Receipt-${submission.orderNumber}.pdf`,
-          path: receiptPath,
-        },
-      ],
-    });
-
-    console.log("✅ [MAIL SENT] To:", submission.email);
-    console.log("📨 [MAIL RESPONSE]", info.response);
-
-    return info;
-  } catch (error) {
-    console.error("❌ [MAIL ERROR]", error.message);
-    throw error;
-  } finally {
-    if (receiptPath && fs.existsSync(receiptPath)) {
-      fs.unlinkSync(receiptPath);
-      console.log("🧹 [CLEANUP] Temp receipt deleted");
-    }
-
-    console.log("📧 [MAIL END] Process completed for:", submission.orderNumber);
-  }
-};
+  console.log("✅ [USER MAIL] Sent. MessageId:", info.messageId);
+  return info;
+}
 
 const notifyAdminPaymentReceived = async (submission) => {
   return transporter.sendMail({
