@@ -26,6 +26,7 @@ async function addActivity(submission, activity) {
 }
 
 const stripeWebhook = asyncHandler(async (req, res) => {
+  console.log("🔥 Stripe webhook HIT");
   const stripe = getStripe();
   const sig = req.headers["stripe-signature"];
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
