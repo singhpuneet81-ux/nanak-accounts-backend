@@ -19,6 +19,8 @@ const submissionsRoutes = require('./routes/admin/submissions.routes');
 const teamRoutes = require('./routes/admin/team.routes');
 const reportsRoutes = require('./routes/admin/reports.routes');
 const accountingPricing = require('./routes/accounting-pricing.routes');
+const solensmsf = require('./routes/accounting-pricing.routes');
+
 
 
 const app = express();
@@ -86,6 +88,8 @@ app.use('/api/admin/submissions', submissionsRoutes);
 app.use('/api/admin/team', teamRoutes);
 app.use('/api/admin/reports', reportsRoutes);
 app.use('/api/admin/accounting-pricing', accountingPricing);
+app.use('/api/admin/smsf-pricing', solensmsf);
+
 
 
 // 404 + error handler
