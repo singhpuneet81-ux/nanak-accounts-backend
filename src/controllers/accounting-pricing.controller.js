@@ -47,7 +47,14 @@ exports.getByServiceKey = async (req, res) => {
   try {
     const { serviceKey } = req.params;
 
-    const validKeys = ["company_accounting", "trust_accounting", "nfp_accounting", "partnership_tax"];
+  const validKeys = [
+  "company_accounting",
+  "trust_accounting",
+  "nfp_accounting",
+  "partnership_tax",
+  "smsf_accounting",
+  "sole_trader_tax_return"
+];
     if (!validKeys.includes(serviceKey)) {
       return res.status(400).json({
         success: false,
