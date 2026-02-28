@@ -4,8 +4,14 @@
  * CRUD operations for SMSF Accounting dynamic pricing
  */
 
+
 const SMSFPricing = require("../models/smsf-pricing.model");
-const seederData = require("../seeders/smsf-pricing-seeder.json");
+const allPricingData = require("../data/accountingPricingData");
+
+// Extract SMSF config from master pricing file
+const seederData = allPricingData.find(
+  s => s.serviceKey === "smsf_accounting"
+);
 
 /**
  * GET /api/admin/smsf-pricing

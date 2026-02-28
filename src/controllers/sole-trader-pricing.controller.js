@@ -5,8 +5,12 @@
  */
 
 const SoleTraderPricing = require("../models/sole-trader-pricing.model");
-const seederData = require("../seeders/sole-trader-pricing-seeder.json");
+const allPricingData = require("../data/accountingPricingData");
 
+// Extract only sole trader config from master pricing file
+const seederData = allPricingData.find(
+  s => s.serviceKey === "sole_trader_tax_return"
+);
 /**
  * GET /api/admin/sole-trader-pricing
  * Public — returns Sole Trader pricing config

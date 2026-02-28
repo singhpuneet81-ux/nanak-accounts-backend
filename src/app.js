@@ -19,8 +19,8 @@ const submissionsRoutes = require('./routes/admin/submissions.routes');
 const teamRoutes = require('./routes/admin/team.routes');
 const reportsRoutes = require('./routes/admin/reports.routes');
 const accountingPricing = require('./routes/accounting-pricing.routes');
-const solensmsf = require('./routes/accounting-pricing.routes');
-const smsf = require('./routes/accounting-pricing.routes');
+const solensmsf = require('./routes/sole-trader-pricing.routes');
+const smsf = require('./routes/smsf-pricing.routes');
 
 
 
