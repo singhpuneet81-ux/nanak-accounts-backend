@@ -21,6 +21,8 @@ const reportsRoutes = require('./routes/admin/reports.routes');
 const accountingPricing = require('./routes/accounting-pricing.routes');
 const solensmsf = require('./routes/sole-trader-pricing.routes');
 const smsf = require('./routes/smsf-pricing.routes');
+const paymentSuccessEmailRoutes = require("./routes/payment-success-email.routes");
+
 
 
 
@@ -93,6 +95,7 @@ app.use('/api/admin/accounting-pricing', accountingPricing);
 
 app.use('/api/admin/smsf-pricing', smsf);
 app.use('/api/admin/sole-trader-pricing', solensmsf);
+app.use("/api/checkout", paymentSuccessEmailRoutes);
 
 
 // 404 + error handler
