@@ -6,7 +6,7 @@
  */
 
 const AccountingPricing = require("../models/accounting-pricing.model");
-const seederData = require("../accounting-pricing-seeder");
+const seederData = require("../data/accountingPricingData");
 
 /**
  * GET /api/admin/accounting-pricing
