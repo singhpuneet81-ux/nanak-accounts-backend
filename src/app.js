@@ -90,6 +90,7 @@ app.use('/api/admin/submissions', submissionsRoutes);
 app.use('/api/admin/team', teamRoutes);
 app.use('/api/admin/reports', reportsRoutes);
 app.use('/api/admin/accounting-pricing', accountingPricing);
+
 app.use('/api/admin/smsf-pricing', smsf);
 app.use('/api/admin/sole-trader-pricing', solensmsf);
 
