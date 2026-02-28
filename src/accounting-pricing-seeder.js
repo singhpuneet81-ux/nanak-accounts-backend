@@ -109,11 +109,8 @@ async function seed() {
     await AccountingPricing.insertMany(data);
 
     console.log("Accounting pricing seeded successfullyyyyyyyyyyyyyy!");
-    process.exit();
   } catch (error) {
     console.error(error);
     process.exit(1);
   }
 }
-
-seed();
