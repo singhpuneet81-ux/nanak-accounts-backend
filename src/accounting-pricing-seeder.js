@@ -94,10 +94,10 @@ const services = [
 async function seed() {
   try {
     await mongoose.connect(MONGO_URI);
-    console.log("MongoDB Connected");
+    console.log("MongoDB Connecteddddddddddddd");
 
     await AccountingPricing.deleteMany({});
-    console.log("Old pricing deleted");
+    console.log("Old pricing deleteddddddddddddddddddd");
 
     const data = services.map(service => ({
       ...baseConfig,
@@ -108,7 +108,7 @@ async function seed() {
 
     await AccountingPricing.insertMany(data);
 
-    console.log("Accounting pricing seeded successfully!");
+    console.log("Accounting pricing seeded successfullyyyyyyyyyyyyyy!");
     process.exit();
   } catch (error) {
     console.error(error);
