@@ -24,6 +24,12 @@ const controller = require("../controllers/accounting-pricing.controller");
 router.get("/", controller.getAll);
 router.get("/:serviceKey", controller.getByServiceKey);
 
+
+
+
+
+
+
 // ─── Admin Routes ───────────────────────────────────────────────
 // Uncomment auth middleware when ready:
 // router.use(requireAuth, requireAdmin);
