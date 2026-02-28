@@ -18,7 +18,7 @@ const dashboardRoutes = require('./routes/admin/dashboard.routes');
 const submissionsRoutes = require('./routes/admin/submissions.routes');
 const teamRoutes = require('./routes/admin/team.routes');
 const reportsRoutes = require('./routes/admin/reports.routes');
-const accountingPricing = require('../src/routes/ap.routes');
+const accountingPricing = require('./routes/accounting-pricing.routes');
 
 
 const app = express();
