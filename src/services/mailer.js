@@ -232,18 +232,78 @@ async function sendPaymentSuccessEmailToUser(submission) {
 }
 
 const notifyAdminPaymentReceived = async (submission) => {
-  return transporter.sendMail({
-    from: `"Nanak Accountants" <${process.env.MAIL_USER}>`,
-    to: ["shivanshunigam8@gmail.com", "singh.puneet81@gmail.com"],
-    subject: `Payment Received - ${submission.orderNumber}`,
-    html: `
-      <h2>Payment Received</h2>
-      <p><strong>Customer:</strong> ${submission.customerName}</p>
-      <p><strong>Email:</strong> ${submission.email}</p>
-      <p><strong>Amount:</strong> $${submission.amount}</p>
-      <p><strong>Stripe Session:</strong> ${submission.stripeCheckoutSessionId}</p>
-    `,
-  });
+  try {
+    const amount = Number(submission.amount || 0);
+    const gst = +(amount / 11).toFixed(2);
+    const subtotal = +(amount - gst).toFixed(2);
+
+    const htmlTemplate = `
+      <div style="font-family: Arial, sans-serif; max-width:650px; margin:auto;">
+
+        <div style="background:#111; padding:18px; text-align:center;">
+          <h2 style="color:#fff; margin:0;">Nanak Accountants</h2>
+        </div>
+
+        <div style="padding:20px; background:#f9f9f9;">
+          <h3 style="margin-top:0;">💰 Payment Received</h3>
+
+          <table style="width:100%; border-collapse:collapse; margin-top:15px;">
+            <tr>
+              <td style="padding:8px; border:1px solid #ddd;"><b>Customer Name</b></td>
+              <td style="padding:8px; border:1px solid #ddd;">${submission.customerName}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px; border:1px solid #ddd;"><b>Email</b></td>
+              <td style="padding:8px; border:1px solid #ddd;">${submission.email}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px; border:1px solid #ddd;"><b>Order Number</b></td>
+              <td style="padding:8px; border:1px solid #ddd;">${submission.orderNumber}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px; border:1px solid #ddd;"><b>Service</b></td>
+              <td style="padding:8px; border:1px solid #ddd;">${submission.serviceName}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px; border:1px solid #ddd;"><b>Subtotal</b></td>
+              <td style="padding:8px; border:1px solid #ddd;">$${subtotal.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px; border:1px solid #ddd;"><b>GST (10%)</b></td>
+              <td style="padding:8px; border:1px solid #ddd;">$${gst.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px; border:1px solid #ddd;"><b>Total Paid</b></td>
+              <td style="padding:8px; border:1px solid #ddd;"><b>$${amount.toFixed(
+                2
+              )}</b></td>
+            </tr>
+            <tr>
+              <td style="padding:8px; border:1px solid #ddd;"><b>Stripe Session ID</b></td>
+              <td style="padding:8px; border:1px solid #ddd;">${submission.stripeCheckoutSessionId}</td>
+            </tr>
+          </table>
+
+          <br/>
+
+          <p style="font-size:12px; color:#777;">
+            This is an automated payment confirmation from the Nanak Accountants system.
+          </p>
+
+        </div>
+      </div>
+    `;
+
+    return transporter.sendMail({
+      from: `"Nanak Accountants" <${process.env.MAIL_FROM}>`,
+      to: ["shivanshunigam8@gmail.com", "singh.puneet81@gmail.com"],
+      subject: `Payment Received - ${submission.orderNumber}`,
+      html: htmlTemplate,
+    });
+  } catch (err) {
+    console.error("❌ Admin email failed:", err.message);
+    throw err;
+  }
 };
 
 module.exports = {
