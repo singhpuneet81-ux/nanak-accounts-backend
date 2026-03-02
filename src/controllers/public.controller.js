@@ -342,7 +342,7 @@ const checkoutSubmit = asyncHandler(async (req, res) => {
       },
     ],
 
-    success_url: `${BASE_URL}/payment-success`,
+    success_url: `${BASE_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${BASE_URL}/payment-failure`,
   });
 
@@ -413,7 +413,7 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
     },
   ],
 
-  success_url: `${BASE_URL}/payment-success`,
+  success_url: `${BASE_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
   cancel_url: `${BASE_URL}/payment-failure`,
 });
 
