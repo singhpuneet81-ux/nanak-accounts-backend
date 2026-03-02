@@ -47,13 +47,17 @@ async function generatePaymentReceipt(submission, options = {}) {
       const dueDate = invoiceDate;
 
       // ===== LOGO (PNG ONLY) =====
-      try {
-        const logoPath = path.join(__dirname, "../assets/logo-nanak.png");
-        doc.image(logoPath, 50, 40, { width: 160 });
-      } catch (err) {
-        doc.fontSize(20).font("Helvetica-Bold");
-        doc.text("Nanak Accountants", 50, 45);
-      }
+   try {
+  const logoPath = path.join(__dirname, "../assets/logo-nanak.jpg");
+
+  console.log("🔍 Logo path:", logoPath);
+
+  doc.image(logoPath, 50, 40, { width: 160 });
+} catch (err) {
+  console.error("❌ Logo load failed:", err.message);
+  doc.fontSize(18).font("Helvetica-Bold");
+  doc.text("Nanak Accountants", 50, 45);
+}
 
       // ===== TAX INVOICE TITLE =====
       doc.fontSize(22).font("Helvetica-Bold").fillColor("#000");
