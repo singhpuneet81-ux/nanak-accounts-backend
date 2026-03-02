@@ -295,7 +295,7 @@ const notifyAdminPaymentReceived = async (submission) => {
     `;
 
     return transporter.sendMail({
-      from: `"Nanak Accountants" <${process.env.MAIL_FROM}>`,
+     from: `"Nanak Accountants" <${process.env.MAIL_FROM || "noreply@nanakaccountants.com.au"}>`,
       to: ["shivanshunigam8@gmail.com", "singh.puneet81@gmail.com"],
       subject: `Payment Received - ${submission.orderNumber}`,
       html: htmlTemplate,
