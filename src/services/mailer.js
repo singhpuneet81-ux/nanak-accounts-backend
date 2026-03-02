@@ -54,7 +54,7 @@ const notifyAdminNewSubmission = async (submission) => {
 
   try {
     const info = await transporter.sendMail({
-      from: `"Nanak Accountants" <${process.env.MAIL_USER}>`,
+   from: `"Nanak Accountants" <${process.env.MAIL_FROM || "noreply@nanakaccountants.com.au"}>`,
       to: ["shivanshunigam8@gmail.com", "singh.puneet81@gmail.com"],
       subject: `🧾 New Submission - ${submission.serviceName} | ${submission.orderNumber}`,
       html: `
@@ -198,7 +198,7 @@ async function sendPaymentSuccessEmailToUser(submission) {
   console.log("📩 [USER MAIL] To:", submission.email);
 
   // 1) Generate PDF Buffer
-  const pdfBuffer = await generateReceiptPdf(submission, {
+  const pdfBuffer = await generatePaymentReceipt(submission, {
     paymentIntentId: submission.paymentIntentId,
     currency: "aud",
   });
