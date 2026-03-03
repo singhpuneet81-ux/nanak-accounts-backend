@@ -22,7 +22,8 @@ const path = require("path");
  * @param {Object} options - { paymentIntentId, currency }
  * @returns {Promise<Buffer>} PDF buffer
  */
-
+const PDFDocument = require("pdfkit");
+const path = require("path");
 
 async function generatePaymentReceipt(submission, options = {}) {
   return new Promise((resolve, reject) => {
