@@ -157,6 +157,7 @@ async function generatePaymentReceipt(submission, options = {}) {
         { align: "center", width: 495 }
       );
 
+      
       // ===== PAYMENT ADVICE =====
       const adviceY = payY + 140;
 
