@@ -54,7 +54,7 @@ const notifyAdminNewSubmission = async (submission) => {
 
   try {
     const info = await transporter.sendMail({
-   from: `"Nanak Accountants" <${process.env.MAIL_FROM || "noreply@nanakaccountants.com.au"}>`,
+   from: `"Nanak Accountants" <${process.env.MAIL_USER || "noreply@nanakaccountants.com.au"}>`,
       to: ["shivanshunigam8@gmail.com", "singh.puneet81@gmail.com"],
       subject: `🧾 New Submission - ${submission.serviceName} | ${submission.orderNumber}`,
       html: `
@@ -198,7 +198,7 @@ async function sendPaymentSuccessEmailToUser(submission) {
   console.log("📩 [USER MAIL] To:", submission.email);
 
   // 1) Generate PDF Buffer
-  const pdfBuffer = await generatePaymentReceipt(submission, {
+  const pdfBuffer = await generateReceiptPdf(submission, {
     paymentIntentId: submission.paymentIntentId,
     currency: "aud",
   });
@@ -295,7 +295,7 @@ const notifyAdminPaymentReceived = async (submission) => {
     `;
 
     return transporter.sendMail({
-     from: `"Nanak Accountants" <${process.env.MAIL_FROM || "noreply@nanakaccountants.com.au"}>`,
+      from: `"Nanak Accountants" <${process.env.MAIL_USER}>`,
       to: ["shivanshunigam8@gmail.com", "singh.puneet81@gmail.com"],
       subject: `Payment Received - ${submission.orderNumber}`,
       html: htmlTemplate,
