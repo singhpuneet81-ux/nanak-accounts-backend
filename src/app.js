@@ -22,6 +22,8 @@ const accountingPricing = require('./routes/accounting-pricing.routes');
 const solensmsf = require('./routes/sole-trader-pricing.routes');
 const smsf = require('./routes/smsf-pricing.routes');
 const paymentSuccessEmailRoutes = require("./routes/payment-success-email.routes");
+const careersRoutes = require("./routes/careers.routes.js");
+
 
 
 
