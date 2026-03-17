@@ -14,6 +14,13 @@
  *   getStats        → Dashboard statistics
  */
 
+const fs = require("fs");
+const uploadDir = "uploads/applications";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+
 const multer = require("multer");
 const path = require("path");
 const JobApplication = require("../models/job-application.model");
