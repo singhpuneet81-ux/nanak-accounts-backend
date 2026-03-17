@@ -96,6 +96,8 @@ app.use('/api/admin/accounting-pricing', accountingPricing);
 app.use('/api/admin/smsf-pricing', smsf);
 app.use('/api/admin/sole-trader-pricing', solensmsf);
 app.use("/api/checkout", paymentSuccessEmailRoutes);
+app.use("/api/careers", careersRoutes);
+app.use("/api/job-applications", jobApplicationRoutes);
 
 
 // 404 + error handler
