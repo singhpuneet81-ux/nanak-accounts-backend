@@ -84,10 +84,10 @@ exports.submit = async (req, res) => {
       experience: body.experience,
       motivation: body.motivation,
       documents: {
-        resumeUrl: `/uploads/applications/${resumeFile.filename}`,
+        resumeUrl: `/uploads/${resumeFile.filename}`,
         resumeFilename: resumeFile.originalname,
         coverLetterUrl: coverLetterFile
-          ? `/uploads/applications/${coverLetterFile.filename}`
+          ? `/uploads/${coverLetterFile.filename}`
           : "",
         coverLetterFilename: coverLetterFile
           ? coverLetterFile.originalname
@@ -128,10 +128,10 @@ exports.submitGeneral = async (req, res) => {
       experience: body.experience,
       motivation: body.motivation,
       documents: {
-        resumeUrl: `/uploads/applications/${resumeFile.filename}`,
+        resumeUrl: `/uploads/${resumeFile.filename}`,
         resumeFilename: resumeFile.originalname,
         coverLetterUrl: coverLetterFile
-          ? `/uploads/applications/${coverLetterFile.filename}`
+          ? `/uploads/${coverLetterFile.filename}`
           : "",
         coverLetterFilename: coverLetterFile
           ? coverLetterFile.originalname
