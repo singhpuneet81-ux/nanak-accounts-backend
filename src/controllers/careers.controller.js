@@ -14,6 +14,7 @@
  *   seed          → Seed default openings from JSON
  */
 
+
 const JobOpening = require("../models/job-opening.model");
 
 // ── Public ──
