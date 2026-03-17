@@ -23,6 +23,8 @@ const solensmsf = require('./routes/sole-trader-pricing.routes');
 const smsf = require('./routes/smsf-pricing.routes');
 const paymentSuccessEmailRoutes = require("./routes/payment-success-email.routes");
 const careersRoutes = require("./routes/careers.routes.js");
+const jobApplicationRoutes = require("./routes/job-applications.routes.js");
+
 
 
 
