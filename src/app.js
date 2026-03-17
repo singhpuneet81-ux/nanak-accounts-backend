@@ -77,8 +77,15 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve uploaded files (local storage)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// const uploadsPath = express.static(path.join(__dirname, 'uploads'));
+// app.use('/uploads', uploadsPath);
+// app.use('/api/uploads', uploadsPath);
+
+const uploadsPath = express.static(path.join(__dirname, 'uploads'));
+app.use('/uploads', uploadsPath);
+app.use('/api/uploads', uploadsPath);
 // Health
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'nanak-accounts-backend', timestamp: new Date().toISOString() });
