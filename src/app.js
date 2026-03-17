@@ -83,6 +83,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // app.use('/uploads', uploadsPath);
 // app.use('/api/uploads', uploadsPath);
 
+
+const applicationsPath = express.static(
+  path.join(__dirname, "../uploads/applications")
+);
+
+app.use("/api/uploads/applications", applicationsPath);
 const uploadsPath = express.static(path.join(__dirname, 'uploads'));
 app.use('/uploads', uploadsPath);
 app.use('/api/uploads', uploadsPath);
