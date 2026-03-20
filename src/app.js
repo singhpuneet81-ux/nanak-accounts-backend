@@ -115,6 +115,9 @@ app.use('/api/admin/sole-trader-pricing', solensmsf);
 app.use("/api/checkout", paymentSuccessEmailRoutes);
 app.use("/api/careers", careersRoutes);
 app.use("/api/job-applications", jobApplicationRoutes);
+app.use("/api/admin/bookkeeping-pricing", require("./routes/bookkeepingPricingRoutes"));  
+app.use("/api/admin/payroll-pricing", require("./routes/payrollPricingRoutes"));
+
 
 
 // 404 + error handler
