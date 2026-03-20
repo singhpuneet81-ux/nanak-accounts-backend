@@ -24,6 +24,10 @@ const smsf = require('./routes/smsf-pricing.routes');
 const paymentSuccessEmailRoutes = require("./routes/payment-success-email.routes");
 const careersRoutes = require("./routes/careers.routes.js");
 const jobApplicationRoutes = require("./routes/job-applications.routes.js");
+const bookkeepingRoutes = require("./routes/bookkeepingPricingRoutes");
+const payrollRoutes = require("./routes/payrollPricingRoutes");
+
+
 
 
 
@@ -115,8 +119,9 @@ app.use('/api/admin/sole-trader-pricing', solensmsf);
 app.use("/api/checkout", paymentSuccessEmailRoutes);
 app.use("/api/careers", careersRoutes);
 app.use("/api/job-applications", jobApplicationRoutes);
-app.use("/api/admin/bookkeeping-pricing", require("./routes/bookkeepingPricingRoutes"));  
-app.use("/api/admin/payroll-pricing", require("./routes/payrollPricingRoutes"));
+app.use('/api/admin/bookkeeping-pricing',bookkeepingRoutes);
+app.use('/api/admin/payroll-pricing',payrollRoutes);
+
 
 
 
