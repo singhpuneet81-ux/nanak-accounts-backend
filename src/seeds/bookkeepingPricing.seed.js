@@ -1,4 +1,3 @@
-
 const BookkeepingPricing = require("../models/BookkeepingPricing.model");
 
 const BOOKKEEPING_DEFAULTS = {
@@ -62,8 +61,15 @@ const bookkeepingSeed = async (req, res) => {
   try {
     await BookkeepingPricing.deleteMany({});
     const doc = await BookkeepingPricing.create(BOOKKEEPING_DEFAULTS);
-    res.json({ success: true, message: "Bookkeeping pricing seeded", data: doc });
+    res.json({
+      success: true,
+      message: "Bookkeeping pricing seeded",
+      data: doc,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
+};
+module.exports = {
+  seed: bookkeepingSeed,
 };

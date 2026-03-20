@@ -1,6 +1,4 @@
-
-
-// const PayrollPricing = require("../models/PayrollPricing.model");
+const PayrollPricing = require("../models/PayrollPricing.model");
 
 const PAYROLL_DEFAULTS = {
   serviceKey: "payroll",
@@ -59,4 +57,8 @@ const payrollSeed = async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
+};
+
+module.exports = {
+  seed: payrollSeed,
 };
