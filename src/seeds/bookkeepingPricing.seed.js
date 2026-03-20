@@ -3,7 +3,7 @@ const BookkeepingPricing = require("../models/BookkeepingPricing.model");
 const BOOKKEEPING_DEFAULTS = {
   serviceKey: "bookkeeping",
   label: "Bookkeeping Services",
-  annualDiscount: 0.2,
+  annualDiscount: 20,
   software: "QuickBooks Online",
   enableStrikePricing: true,
   tiers: [
@@ -16,7 +16,13 @@ const BOOKKEEPING_DEFAULTS = {
     },
     { name: "Scale", txn: "Up to 500 txns/mo", rate: 480, badge: "" },
   ],
-  addonPrices: { payroll: 25, feeds: 20, ias: 50, jobtrack: 40, catchup: 299 },
+  addonPrices: {
+    payroll: 25,
+    feeds: 20,
+    ias: 50,
+    jobtrack: 40,
+    catchup: 299,
+  },
   planFeatures: [
     {
       name: "Starter",
