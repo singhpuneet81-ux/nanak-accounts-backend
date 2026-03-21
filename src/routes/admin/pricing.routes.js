@@ -12,8 +12,8 @@ router.put('/:key', pricingController.updateService);
 router.delete('/:key', pricingController.deleteService);
 // router.post('/reset', pricingController.resetPricing);
 
-router.post("/pricing/seed-packages", packageSeeder.seedPackagePlans);
-router.delete("/pricing/clear-packages", packageSeeder.clearPackagePlans);
+router.post("/seed-packages", packageSeeder.seedPackagePlans);
+router.delete("/clear-packages", packageSeeder.clearPackagePlans);
 
 
 
