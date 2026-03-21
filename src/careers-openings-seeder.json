@@ -1,0 +1,186 @@
+[
+  {
+    "title": "Senior Accountant",
+    "department": "Accounting & Tax",
+    "location": "Sydney, AU",
+    "type": "Full-Time",
+    "salary": "$90K – $120K / year",
+    "experience": "5+ years",
+    "description": "Lead complex accounting engagements for high-value clients. Work with cutting-edge tools in a supportive, collaborative environment.",
+    "requirements": [
+      "CA/CPA qualified",
+      "5+ years in public practice or industry",
+      "Strong knowledge of Australian tax law",
+      "Proficient in Xero and MYOB"
+    ],
+    "responsibilities": [
+      "Manage a portfolio of SME clients",
+      "Prepare and review financial statements",
+      "Tax planning and compliance advisory",
+      "Mentor graduate and junior accountants"
+    ],
+    "featured": true,
+    "active": true
+  },
+  {
+    "title": "Tax Specialist",
+    "department": "Accounting & Tax",
+    "location": "Melbourne, AU",
+    "type": "Full-Time",
+    "salary": "$85K – $110K / year",
+    "experience": "3+ years",
+    "description": "Prepare and review individual and business tax returns. Advise clients on tax-effective structures and ATO compliance.",
+    "requirements": [
+      "CA/CPA qualified or near completion",
+      "3+ years in tax preparation",
+      "Knowledge of CGT, FBT, and GST",
+      "Experience with tax software"
+    ],
+    "responsibilities": [
+      "Prepare individual and business tax returns",
+      "Review tax positions and identify savings",
+      "Liaise with the ATO on client matters",
+      "Advise on structuring and compliance"
+    ],
+    "featured": true,
+    "active": true
+  },
+  {
+    "title": "Bookkeeper – Cloud Accounting",
+    "department": "Bookkeeping",
+    "location": "Remote, AU",
+    "type": "Part-Time",
+    "salary": "$55K – $70K / year",
+    "experience": "2+ years",
+    "description": "Manage day-to-day bookkeeping on Xero & MYOB for a portfolio of SME clients across Australia.",
+    "requirements": [
+      "Cert IV in Bookkeeping or equivalent",
+      "2+ years experience with Xero/MYOB",
+      "BAS Agent registration preferred",
+      "Strong attention to detail"
+    ],
+    "responsibilities": [
+      "Process accounts payable and receivable",
+      "Bank reconciliations and BAS preparation",
+      "Payroll processing and STP reporting",
+      "Client communication and support"
+    ],
+    "featured": false,
+    "active": true
+  },
+  {
+    "title": "Office & Admin Manager",
+    "department": "Operations",
+    "location": "Sydney, AU",
+    "type": "Full-Time",
+    "salary": "$65K – $80K / year",
+    "experience": "3+ years",
+    "description": "Oversee office operations, coordinate team schedules, and manage client on-boarding processes.",
+    "requirements": [
+      "3+ years in office management",
+      "Strong organisational skills",
+      "Proficient in Google Workspace / MS Office",
+      "Experience in professional services preferred"
+    ],
+    "responsibilities": [
+      "Manage office operations and supplies",
+      "Coordinate team schedules and meetings",
+      "Client on-boarding and CRM management",
+      "Support HR and recruitment processes"
+    ],
+    "featured": false,
+    "active": true
+  },
+  {
+    "title": "Graduate Accountant",
+    "department": "Accounting & Tax",
+    "location": "Sydney / Melbourne, AU",
+    "type": "Full-Time",
+    "salary": "$55K – $65K / year",
+    "experience": "0-1 years",
+    "description": "Kick-start your accounting career with mentorship, CA/CPA support, and exposure to real client engagements.",
+    "requirements": [
+      "Bachelor's degree in Accounting or Finance",
+      "Enrolled or intending to enroll in CA/CPA",
+      "Strong academic record",
+      "Excellent communication skills"
+    ],
+    "responsibilities": [
+      "Assist senior accountants with client work",
+      "Prepare basic tax returns and BAS",
+      "Data entry and reconciliations",
+      "Participate in training and development"
+    ],
+    "featured": true,
+    "active": true
+  },
+  {
+    "title": "Client Success Coordinator",
+    "department": "Client Services",
+    "location": "Remote, AU",
+    "type": "Full-Time",
+    "salary": "$60K – $75K / year",
+    "experience": "1+ years",
+    "description": "Be the first point of contact for clients, ensuring seamless on-boarding and ongoing satisfaction.",
+    "requirements": [
+      "1+ years in customer service or client management",
+      "Excellent verbal and written communication",
+      "Experience with CRM tools",
+      "Understanding of accounting services is a plus"
+    ],
+    "responsibilities": [
+      "Client on-boarding and welcome calls",
+      "Manage client inquiries and escalations",
+      "Track satisfaction and feedback",
+      "Coordinate with internal teams"
+    ],
+    "featured": false,
+    "active": true
+  },
+  {
+    "title": "Payroll Specialist",
+    "department": "Payroll",
+    "location": "Melbourne, AU",
+    "type": "Full-Time",
+    "salary": "$65K – $85K / year",
+    "experience": "2+ years",
+    "description": "Process fortnightly payroll, manage STP reporting and ensure award compliance for a diverse client base.",
+    "requirements": [
+      "2+ years payroll experience",
+      "Knowledge of Australian awards and FairWork",
+      "Experience with Xero Payroll or KeyPay",
+      "STP and superannuation knowledge"
+    ],
+    "responsibilities": [
+      "Process fortnightly and monthly payroll",
+      "STP reporting and year-end finalisation",
+      "Award interpretation and compliance",
+      "Superannuation processing"
+    ],
+    "featured": false,
+    "active": true
+  },
+  {
+    "title": "Business Advisory Consultant",
+    "department": "Advisory",
+    "location": "Sydney, AU",
+    "type": "Full-Time",
+    "salary": "$100K – $130K / year",
+    "experience": "5+ years",
+    "description": "Partner with SME owners to deliver strategic advice on structuring, cash flow, and growth planning.",
+    "requirements": [
+      "CA/CPA qualified",
+      "5+ years in advisory or consulting",
+      "Strong commercial acumen",
+      "Experience with business valuations and restructuring"
+    ],
+    "responsibilities": [
+      "Strategic advisory for SME clients",
+      "Business structuring and restructuring",
+      "Cash flow management and forecasting",
+      "Growth planning and benchmarking"
+    ],
+    "featured": false,
+    "active": true
+  }
+]

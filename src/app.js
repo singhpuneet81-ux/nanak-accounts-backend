@@ -22,6 +22,14 @@ const accountingPricing = require('./routes/accounting-pricing.routes');
 const solensmsf = require('./routes/sole-trader-pricing.routes');
 const smsf = require('./routes/smsf-pricing.routes');
 const paymentSuccessEmailRoutes = require("./routes/payment-success-email.routes");
+const careersRoutes = require("./routes/careers.routes.js");
+const jobApplicationRoutes = require("./routes/job-applications.routes.js");
+const bookkeepingRoutes = require("./routes/bookkeepingPricingRoutes");
+const payrollRoutes = require("./routes/payrollPricingRoutes");
+
+
+
+
 
 
 
@@ -73,8 +81,21 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve uploaded files (local storage)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// const uploadsPath = express.static(path.join(__dirname, 'uploads'));
+// app.use('/uploads', uploadsPath);
+// app.use('/api/uploads', uploadsPath);
+
+
+const applicationsPath = express.static(
+  path.join(__dirname, "../uploads/applications")
+);
+
+app.use("/api/uploads/applications", applicationsPath);
+const uploadsPath = express.static(path.join(__dirname, 'uploads'));
+app.use('/uploads', uploadsPath);
+app.use('/api/uploads', uploadsPath);
 // Health
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'nanak-accounts-backend', timestamp: new Date().toISOString() });
@@ -96,6 +117,12 @@ app.use('/api/admin/accounting-pricing', accountingPricing);
 app.use('/api/admin/smsf-pricing', smsf);
 app.use('/api/admin/sole-trader-pricing', solensmsf);
 app.use("/api/checkout", paymentSuccessEmailRoutes);
+app.use("/api/careers", careersRoutes);
+app.use("/api/job-applications", jobApplicationRoutes);
+app.use('/api/admin/bookkeeping-pricing',bookkeepingRoutes);
+app.use('/api/admin/payroll-pricing',payrollRoutes);
+
+
 
 
 // 404 + error handler

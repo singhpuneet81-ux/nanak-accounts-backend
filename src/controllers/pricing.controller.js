@@ -1,15 +1,35 @@
 const PricingService = require("../models/PricingService");
+const BookkeepingPricing = require("../models/BookkeepingPricing.model");
+const PayrollPricing = require("../models/PayrollPricing.model");
 
 // GET ALL
 exports.getAllServices = async (req, res) => {
   try {
-    const services = await PricingService.find().sort({ createdAt: -1 });
-    res.json({ services });
-  } catch (err) {
-    res.status(500).json({
-      message: 'Failed to fetch services',
-      error: err.message,
+    const [services, bookkeepingServices, payrollServices] = await Promise.all([
+      PricingService.find().sort({ createdAt: -1 }).lean(),
+      BookkeepingPricing.find().lean(),
+      PayrollPricing.find().lean(),
+    ]);
+
+    const bookkeepingMapped = bookkeepingServices.map((s) => ({
+      ...s,
+      _type: "bookkeeping",
+      category: "accounting_tax",
+    }));
+
+    const payrollMapped = payrollServices.map((s) => ({
+      ...s,
+      _type: "payroll",
+      category: "accounting_tax",
+    }));
+
+    res.json({
+      services: [...services, ...bookkeepingMapped, ...payrollMapped],
     });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch services", error: err.message });
   }
 };
 
@@ -18,13 +38,12 @@ exports.getService = async (req, res) => {
   try {
     const service = await PricingService.findOne({ key: req.params.key });
 
-    if (!service)
-      return res.status(404).json({ message: 'Service not found' });
+    if (!service) return res.status(404).json({ message: "Service not found" });
 
     res.json(service);
   } catch (err) {
     res.status(500).json({
-      message: 'Failed to fetch service',
+      message: "Failed to fetch service",
       error: err.message,
     });
   }
@@ -36,11 +55,11 @@ exports.createService = async (req, res) => {
     const { key, label, foundation, accounting, meta, category } = req.body;
 
     if (!key || !foundation?.title || foundation?.price === undefined)
-      return res.status(400).json({ message: 'Missing required fields' });
+      return res.status(400).json({ message: "Missing required fields" });
 
     const exists = await PricingService.findOne({ key });
     if (exists)
-      return res.status(409).json({ message: 'Service key already exists' });
+      return res.status(409).json({ message: "Service key already exists" });
 
     const service = await PricingService.create({
       key,
@@ -51,9 +70,11 @@ exports.createService = async (req, res) => {
       category: category || null,
     });
 
-    res.status(201).json({ message: 'Service created successfully', service });
+    res.status(201).json({ message: "Service created successfully", service });
   } catch (err) {
-    res.status(500).json({ message: 'Failed to create service', error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to create service", error: err.message });
   }
 };
 
@@ -72,19 +93,18 @@ exports.updateService = async (req, res) => {
     const service = await PricingService.findOneAndUpdate(
       { key: req.params.key },
       { $set: updateFields },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
-    if (!service)
-      return res.status(404).json({ message: 'Service not found' });
+    if (!service) return res.status(404).json({ message: "Service not found" });
 
-    res.json({ message: 'Service updated successfully', service });
+    res.json({ message: "Service updated successfully", service });
   } catch (err) {
-    res.status(500).json({ message: 'Failed to update service', error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to update service", error: err.message });
   }
 };
-
-
 
 // DELETE
 exports.deleteService = async (req, res) => {
@@ -93,13 +113,12 @@ exports.deleteService = async (req, res) => {
       key: req.params.key,
     });
 
-    if (!service)
-      return res.status(404).json({ message: 'Service not found' });
+    if (!service) return res.status(404).json({ message: "Service not found" });
 
-    res.json({ message: 'Service deleted successfully' });
+    res.json({ message: "Service deleted successfully" });
   } catch (err) {
     res.status(500).json({
-      message: 'Failed to delete service',
+      message: "Failed to delete service",
       error: err.message,
     });
   }
@@ -112,20 +131,20 @@ exports.resetPricing = async (req, res) => {
 
     const defaults = [
       {
-        key: 'abn',
-        label: 'ABN Registration',
+        key: "abn",
+        label: "ABN Registration",
         foundation: {
-          title: 'Foundation Setup',
+          title: "Foundation Setup",
           price: 99,
           features: [
-            'ABN Registration with ATO',
-            'Business Name Availability Check',
+            "ABN Registration with ATO",
+            "Business Name Availability Check",
           ],
         },
         accounting: {
           includes: [
-            'Monthly Bookkeeping & Bank Reconciliation',
-            'Quarterly BAS Preparation & Lodgement',
+            "Monthly Bookkeeping & Bank Reconciliation",
+            "Quarterly BAS Preparation & Lodgement",
           ],
           extraCount: 8,
         },
@@ -135,12 +154,12 @@ exports.resetPricing = async (req, res) => {
     const services = await PricingService.insertMany(defaults);
 
     res.json({
-      message: 'Pricing reset to defaults',
+      message: "Pricing reset to defaults",
       services,
     });
   } catch (err) {
     res.status(500).json({
-      message: 'Failed to reset pricing',
+      message: "Failed to reset pricing",
       error: err.message,
     });
   }
