@@ -544,25 +544,30 @@ exports.seedPackagePlans = async (req, res) => {
     const results = [];
 
     for (const [key, packagePlans] of Object.entries(SERVICE_PACKAGES)) {
-      const updated = await PricingService.findOneAndUpdate(
-        { key },
-        {
-          $set: {
-            "meta.packagePlans": packagePlans
-          }
-        },
-        { new: true }
-      );
+      const doc = await PricingService.findOne({ key });
+      if (!doc) {
+        results.push({ key, status: "not_found" });
+        continue;
+      }
 
-      results.push({
-        key,
-        status: updated ? "updated" : "not_found",
+      const safeMeta =
+        doc.meta && typeof doc.meta === "object" && !Array.isArray(doc.meta)
+          ? doc.meta
+          : {};
+
+      doc.set("meta", {
+        ...safeMeta,
+        packagePlans,
       });
+
+      await doc.save();
+
+      results.push({ key, status: "updated" });
     }
 
     return res.json({
       success: true,
-      message: `Package plans seeded for ${results.filter(r => r.status === "updated").length} services`,
+      message: `Package plans seeded for ${results.filter((r) => r.status === "updated").length} services`,
       results,
     });
   } catch (err) {
@@ -570,6 +575,7 @@ exports.seedPackagePlans = async (req, res) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
 
 /**
  * DELETE /api/admin/pricing/clear-packages

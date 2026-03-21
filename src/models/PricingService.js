@@ -21,7 +21,7 @@ const pricingServiceSchema = new mongoose.Schema(
       extraCount: { type: Number, default: 0 },
     },
 
-    meta: { type: mongoose.Schema.Types.Mixed, default: null },
+    meta: { type: mongoose.Schema.Types.Mixed, default: {} },
   },
   { timestamps: true }
 );
