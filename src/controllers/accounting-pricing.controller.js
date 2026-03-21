@@ -83,53 +83,62 @@ exports.getByServiceKey = async (req, res) => {
   }
 };
 
-/**
- * PUT /api/admin/accounting-pricing/:serviceKey
- * Admin only — updates pricing for a specific service
- */
+
+// exports.update = async (req, res) => {
+//   try {
+//     const { serviceKey } = req.params;
+//     const updateData = req.body;
+
+//     const validKeys = ["company_accounting", "trust_accounting", "nfp_accounting", "partnership_tax"];
+//     if (!validKeys.includes(serviceKey)) {
+//       return res.status(400).json({
+//         success: false,
+//         error: `Invalid serviceKey. Must be one of: ${validKeys.join(", ")}`,
+//       });
+//     }
+
+//     // Prevent changing serviceKey
+//     delete updateData.serviceKey;
+//     delete updateData._id;
+
+//     const data = await AccountingPricing.findOneAndUpdate(
+//       { serviceKey },
+//       { $set: updateData },
+//       { new: true, upsert: true, runValidators: true }
+//     ).lean();
+
+//     return res.json({
+//       success: true,
+//       message: `Pricing for ${serviceKey} updated successfully`,
+//       data,
+//     });
+//   } catch (error) {
+//     console.error("Error updating pricing:", error);
+//     return res.status(500).json({
+//       success: false,
+//       error: "Failed to update pricing",
+//     });
+//   }
+// };
+
 exports.update = async (req, res) => {
   try {
-    const { serviceKey } = req.params;
-    const updateData = req.body;
-
-    const validKeys = ["company_accounting", "trust_accounting", "nfp_accounting", "partnership_tax"];
-    if (!validKeys.includes(serviceKey)) {
-      return res.status(400).json({
-        success: false,
-        error: `Invalid serviceKey. Must be one of: ${validKeys.join(", ")}`,
-      });
-    }
-
-    // Prevent changing serviceKey
-    delete updateData.serviceKey;
+    const updateData = { ...req.body };
     delete updateData._id;
+    delete updateData.__v;
 
-    const data = await AccountingPricing.findOneAndUpdate(
-      { serviceKey },
+    const service = await AccountingPricing.findOneAndUpdate(
+      { serviceKey: req.params.serviceKey },
       { $set: updateData },
-      { new: true, upsert: true, runValidators: true }
-    ).lean();
-
-    return res.json({
-      success: true,
-      message: `Pricing for ${serviceKey} updated successfully`,
-      data,
-    });
-  } catch (error) {
-    console.error("Error updating pricing:", error);
-    return res.status(500).json({
-      success: false,
-      error: "Failed to update pricing",
-    });
+      { new: true, runValidators: true }
+    );
+    if (!service) return res.status(404).json({ message: "Not found" });
+    res.json({ message: "Updated", service });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
-/**
- * PUT /api/admin/accounting-pricing/:serviceKey/tiers
- * Admin only — updates ONLY the revenue tier pricing (compliance + monthly)
- * 
- * Body: { "under75k": { "compliance": 1200, "monthly": 100 }, ... }
- */
 exports.updateTiers = async (req, res) => {
   try {
     const { serviceKey } = req.params;
