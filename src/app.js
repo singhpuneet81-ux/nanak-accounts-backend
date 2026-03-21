@@ -53,7 +53,11 @@ app.use(
       "https://nanak-admin.vercel.app",
       "http://localhost:3000",
       "http://localhost:8080",
+      ".loveable.app",
+      "https://loveable.app",
+      "https://www.loveable.app",
       "http://localhost:8081",
+      "https://loveable.com","loveableproject.com","https://loveableproject.com","https://www.loveableproject.com",".loveableproject.com",
       "https://online.nanakaccountants.com.au", "https://admin.nanakaccountants.com.au", "https://admin.nanakaccountants.com.au/login"    ],
     credentials: true,
   })
