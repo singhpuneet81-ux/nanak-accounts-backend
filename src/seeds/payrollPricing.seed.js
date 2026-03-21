@@ -20,32 +20,47 @@ const PAYROLL_DEFAULTS = {
     backpay: 199,
     healthcheck: 350,
   },
-  planFeatures: [
-    {
-      name: "Standard",
-      badge: "",
-      features: [
-        { text: "STP Phase 2 lodgement every pay run", type: "std" },
-        { text: "Super processing at 12% SG", type: "std" },
-        { text: "PAYG withholding calculation", type: "std" },
-        { text: "Payslips & leave tracking", type: "std" },
-        { text: "Year-end finalisation (EOFY)", type: "comp" },
-        { text: "Payday Super ready (July 2026)", type: "hi" },
-      ],
-    },
-    {
-      name: "Premium",
-      badge: "MOST POPULAR",
-      features: [
-        { text: "Everything in Standard", type: "hi" },
-        { text: "Award interpretation & penalty rates", type: "std" },
-        { text: "Overtime & shift loading calculations", type: "std" },
-        { text: "Allowances & reimbursements", type: "comp" },
-        { text: "Super clearing house management", type: "comp" },
-        { text: "Dedicated payroll specialist", type: "hi" },
-      ],
-    },
-  ],
+ planFeatures: [
+      {
+        name: "Standard",
+        badge: "",
+        subtitle: "Core payroll compliance for small teams",
+        features: [
+          { text: "STP Phase 2 lodgement every pay run", type: "std" },
+          { text: "Super processing at 12% SG", type: "std" },
+          { text: "PAYG withholding calculation", type: "std" },
+          { text: "Payslips & leave tracking", type: "std" },
+          { text: "Year-end finalisation (EOFY)", type: "comp" },
+          { text: "Payday Super ready (July 2026)", type: "hi" }
+        ]
+      },
+      {
+        name: "Premium",
+        badge: "MOST POPULAR",
+        subtitle: "Full-service payroll management",
+        features: [
+          { text: "Everything in Standard", type: "hi" },
+          { text: "Award interpretation & penalty rates", type: "std" },
+          { text: "Overtime & shift loading calculations", type: "std" },
+          { text: "Allowances & reimbursements", type: "comp" },
+          { text: "Super clearing house management", type: "comp" },
+          { text: "Dedicated payroll specialist", type: "hi" }
+        ]
+      },
+      {
+        name: "Enterprise",
+        badge: "",
+        subtitle: "Multi-award & complex payroll at scale",
+        features: [
+          { text: "Everything in Premium", type: "hi" },
+          { text: "Multi-award & EBA management", type: "std" },
+          { text: "Workforce cost analysis & reporting", type: "std" },
+          { text: "Custom pay schedules & structures", type: "std" },
+          { text: "Termination & redundancy calculations", type: "comp" },
+          { text: "Dedicated senior payroll manager", type: "hi" }
+        ]
+      }
+    ]
 };
 
 const payrollSeed = async (req, res) => {

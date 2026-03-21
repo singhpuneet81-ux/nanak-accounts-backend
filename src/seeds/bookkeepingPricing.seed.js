@@ -24,43 +24,46 @@ const BOOKKEEPING_DEFAULTS = {
     catchup: 299,
   },
   planFeatures: [
-    {
-      name: "Starter",
-      badge: "",
-      features: [
-        "Monthly bookkeeping",
-        "1 bank / card feed",
-        "BAS preparation & lodgement",
-        "QuickBooks Online included",
-        "Monthly reconciliation",
-        "Email support",
-      ],
-    },
-    {
-      name: "Growth",
-      badge: "MOST POPULAR",
-      features: [
-        "Everything in Starter",
-        "Up to 3 bank / card feeds",
-        "Monthly P&L & balance sheet",
-        "Accounts payable & receivable",
-        "Fortnightly reconciliation",
-        "Priority support",
-      ],
-    },
-    {
-      name: "Scale",
-      badge: "",
-      features: [
-        "Everything in Growth",
-        "Unlimited bank feeds",
-        "Weekly reconciliation",
-        "Cash flow forecasting",
-        "Dedicated bookkeeper",
-        "Phone & video support",
-      ],
-    },
-  ],
+      {
+        name: "Starter",
+        badge: "",
+        subtitle: "New or small business · freelancers & sole traders",
+        features: [
+          "Monthly bookkeeping",
+          "1 bank / card feed",
+          "BAS preparation & lodgement",
+          "QuickBooks Online included",
+          "Monthly reconciliation",
+          "Email support"
+        ]
+      },
+      {
+        name: "Growth",
+        badge: "MOST POPULAR",
+        subtitle: "Growing businesses · small teams & retailers",
+        features: [
+          "Everything in Starter",
+          "Up to 3 bank / card feeds",
+          "Monthly P&L & balance sheet",
+          "Accounts payable & receivable",
+          "Fortnightly reconciliation",
+          "Priority support"
+        ]
+      },
+      {
+        name: "Scale",
+        badge: "",
+        subtitle: "Established business · e-commerce & multi-entity",
+        features: [
+          "Everything in Growth",
+          "Unlimited bank feeds",
+          "Weekly reconciliation",
+          "Cash flow forecasting",
+          "Dedicated bookkeeper",
+          "Phone & video support"
+        ]
+      }
+    ]
 };
 
 const bookkeepingSeed = async (req, res) => {
