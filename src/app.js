@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require("fs");
 
 const { notFound } = require('./middleware/notFound');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -26,6 +27,17 @@ const careersRoutes = require("./routes/careers.routes.js");
 const jobApplicationRoutes = require("./routes/job-applications.routes.js");
 const bookkeepingRoutes = require("./routes/bookkeepingPricingRoutes");
 const payrollRoutes = require("./routes/payrollPricingRoutes");
+const webinarUploadsDir = path.join(__dirname, "uploads", "webinars");
+
+
+if (!fs.existsSync(webinarUploadsDir)) {
+  fs.mkdirSync(webinarUploadsDir, { recursive: true });
+}
+
+// Import routes
+const webinarRoutes = require("./routes/webinar.routes");
+const adminWebinarRoutes = require("./routes/admin-webinar.routes");
+const adminWebinarRegRoutes = require("./routes/admin-webinar-registration.routes.js");
 
 
 
@@ -126,6 +138,17 @@ app.use("/api/careers", careersRoutes);
 app.use("/api/job-applications", jobApplicationRoutes);
 app.use('/api/admin/bookkeeping-pricing',bookkeepingRoutes);
 app.use('/api/admin/payroll-pricing',payrollRoutes);
+
+
+// Mount public routes (no auth)
+app.use("/api/webinars", webinarRoutes);
+
+// Mount admin routes (auth required)
+app.use("/api/admin/webinars", adminWebinarRoutes);
+app.use("/api/admin/webinar-registrations", adminWebinarRegRoutes);
+
+// Serve uploaded webinar images statically
+app.use("/uploads/webinars", express.static(path.resolve(process.cwd(), "uploads/webinars")));
 
 
 
