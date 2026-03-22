@@ -10,6 +10,13 @@
  *   toggleStatus    → Change webinar status
  */
 
+
+const fs = require('fs');
+const uploadDir = 'uploads/webinars';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const Webinar = require("../models/webinar.model");
 const WebinarRegistration = require("../models/webinar-registration.model");
 
