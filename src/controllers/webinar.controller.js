@@ -29,7 +29,7 @@ exports.getAll = async (req, res) => {
     const total = await Webinar.countDocuments(filter);
 
     const webinars = await Webinar.find(filter)
-      .populate("registered")
+      .populate("actualRegistrations")
       .sort({ featured: -1, date: 1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -53,9 +53,13 @@ exports.getAll = async (req, res) => {
 
 exports.getById = async (req, res) => {
   try {
-    const webinar = await Webinar.findById(req.params.id).populate("registered");
+    const webinar = await Webinar.findById(req.params.id).populate(
+      "actualRegistrations",
+    );
     if (!webinar) {
-      return res.status(404).json({ success: false, error: "Webinar not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Webinar not found" });
     }
     res.json({ success: true, data: webinar });
   } catch (err) {
@@ -87,7 +91,9 @@ exports.register = async (req, res) => {
     }
 
     // Check webinar exists and is published
-    const webinar = await Webinar.findById(req.params.id).populate("registered");
+    const webinar = await Webinar.findById(req.params.id).populate(
+      "actualRegistrations",
+    );
     if (!webinar || webinar.status !== "published") {
       return res.status(404).json({
         success: false,
