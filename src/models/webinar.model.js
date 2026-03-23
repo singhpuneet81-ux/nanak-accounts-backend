@@ -23,6 +23,7 @@ const webinarSchema = new mongoose.Schema(
     speakerImage: { type: String, default: "" },
     videoLink: { type: String, trim: true, default: "" },
     thumbnailImage: { type: String, default: "" },
+    registeredCount: { type: Number, default: 0 },
     learnings: [{ type: String }],
     tags: [{ type: String }],
     maxSeats: { type: Number, default: null },
@@ -45,11 +46,11 @@ const webinarSchema = new mongoose.Schema(
     collection: "webinars",
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 // Virtual: registered count
-webinarSchema.virtual("registered", {
+webinarSchema.virtual("actualRegistrations", {
   ref: "WebinarRegistration",
   localField: "_id",
   foreignField: "webinarId",
