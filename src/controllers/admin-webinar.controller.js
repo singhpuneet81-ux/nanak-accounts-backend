@@ -10,9 +10,8 @@
  *   toggleStatus    → Change webinar status
  */
 
-
-const fs = require('fs');
-const uploadDir = 'uploads/webinars';
+const fs = require("fs");
+const uploadDir = "uploads/webinars";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -39,7 +38,7 @@ exports.getAll = async (req, res) => {
     const total = await Webinar.countDocuments(filter);
 
     const webinars = await Webinar.find(filter)
-      .populate("registered")
+      .populate("actualRegistrations")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -63,9 +62,13 @@ exports.getAll = async (req, res) => {
 
 exports.getById = async (req, res) => {
   try {
-    const webinar = await Webinar.findById(req.params.id).populate("registered");
+    const webinar = await Webinar.findById(req.params.id).populate(
+      "actualRegistrations",
+    );
     if (!webinar) {
-      return res.status(404).json({ success: false, error: "Webinar not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Webinar not found" });
     }
     res.json({ success: true, data: webinar });
   } catch (err) {
@@ -141,11 +144,13 @@ exports.update = async (req, res) => {
     const webinar = await Webinar.findByIdAndUpdate(
       req.params.id,
       { $set: data },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!webinar) {
-      return res.status(404).json({ success: false, error: "Webinar not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Webinar not found" });
     }
 
     res.json({
@@ -164,7 +169,9 @@ exports.delete = async (req, res) => {
   try {
     const webinar = await Webinar.findByIdAndDelete(req.params.id);
     if (!webinar) {
-      return res.status(404).json({ success: false, error: "Webinar not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Webinar not found" });
     }
 
     // Also delete all registrations for this webinar
@@ -187,18 +194,21 @@ exports.toggleStatus = async (req, res) => {
     if (!["draft", "published", "cancelled", "completed"].includes(status)) {
       return res.status(400).json({
         success: false,
-        error: "Invalid status. Must be: draft, published, cancelled, or completed",
+        error:
+          "Invalid status. Must be: draft, published, cancelled, or completed",
       });
     }
 
     const webinar = await Webinar.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true }
+      { new: true },
     );
 
     if (!webinar) {
-      return res.status(404).json({ success: false, error: "Webinar not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Webinar not found" });
     }
 
     res.json({ success: true, data: webinar });
