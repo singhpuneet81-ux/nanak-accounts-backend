@@ -53,7 +53,9 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Basic security + logging
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+}));
 app.use(morgan('dev'));
 
 // CORS
