@@ -55,7 +55,7 @@ const notifyAdminNewSubmission = async (submission) => {
   try {
     const info = await transporter.sendMail({
    from: `"Nanak Accountants" <${process.env.MAIL_USER || "noreply@nanakaccountants.com.au"}>`,
-      to: ["shivanshunigam8@gmail.com", "singh.puneet81@gmail.com"],
+      to: "singh.puneet81@gmail.com",
       subject: `🧾 New Submission - ${submission.serviceName} | ${submission.orderNumber}`,
       html: `
 <!DOCTYPE html>
@@ -296,7 +296,7 @@ const notifyAdminPaymentReceived = async (submission) => {
 
     return transporter.sendMail({
       from: `"Nanak Accountants" <${process.env.MAIL_USER}>`,
-      to: ["shivanshunigam8@gmail.com", "singh.puneet81@gmail.com"],
+      to: "singh.puneet81@gmail.com",
       subject: `Payment Received - ${submission.orderNumber}`,
       html: htmlTemplate,
     });
