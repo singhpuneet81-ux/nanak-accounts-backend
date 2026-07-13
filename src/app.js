@@ -38,6 +38,7 @@ if (!fs.existsSync(webinarUploadsDir)) {
 const webinarRoutes = require("./routes/webinar.routes");
 const adminWebinarRoutes = require("./routes/admin-webinar.routes");
 const adminWebinarRegRoutes = require("./routes/admin-webinar-registration.routes.js");
+const benchmarkModuleRoutes = require("./modules/benchmark/benchmark.routes");
 
 
 
@@ -148,6 +149,11 @@ app.use("/api/webinars", webinarRoutes);
 // Mount admin routes (auth required)
 app.use("/api/admin/webinars", adminWebinarRoutes);
 app.use("/api/admin/webinar-registrations", adminWebinarRegRoutes);
+
+// Benchmark Intelligence Module
+app.use("/api/benchmark", benchmarkModuleRoutes);
+// Backward-compatible alias for existing admin UI clients
+app.use("/api/admin/benchmarks", benchmarkModuleRoutes);
 
 // Serve uploaded webinar images statically
 app.use("/uploads/webinars", express.static(path.resolve(process.cwd(), "uploads/webinars")));
