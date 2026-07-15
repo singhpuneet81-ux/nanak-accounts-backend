@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, index: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['admin', 'manager', 'staff'], default: 'staff' },
+    // Custom per-user module access. null/empty = use role defaults.
+    permissions: { type: [String], default: null },
     active: { type: Boolean, default: true },
     avatar: { type: String, default: null },
   },

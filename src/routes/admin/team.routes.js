@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { protect } = require('../../middleware/auth');
-const { requireRole } = require('../../middleware/roles');
+const { requireRole, requireModule } = require('../../middleware/roles');
 const { validate } = require('../../middleware/validate');
 const {
   listTeam,
@@ -15,9 +15,11 @@ const {
 router.use(protect);
 router.use(requireRole('admin', 'manager', 'staff'));
 
+// Listing stays open to all roles (used for assignment dropdowns).
 router.get('/', listTeam);
-router.post('/', createValidators, validate, createMember);
-router.put('/:id', updateValidators, validate, updateMember);
-router.delete('/:id', deleteValidators, validate, deleteMember);
+// Mutations require access to the Team module (admins by default).
+router.post('/', requireModule('team'), createValidators, validate, createMember);
+router.put('/:id', requireModule('team'), updateValidators, validate, updateMember);
+router.delete('/:id', requireModule('team'), deleteValidators, validate, deleteMember);
 
 module.exports = router;

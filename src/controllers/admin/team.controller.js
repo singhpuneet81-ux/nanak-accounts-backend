@@ -2,6 +2,14 @@ const { body, param } = require('express-validator');
 const User = require('../../models/User');
 const Submission = require('../../models/Submission');
 const { asyncHandler } = require('../../middleware/asyncHandler');
+const { MODULE_KEYS, effectiveModules } = require('../../config/modules');
+
+function sanitizePermissions(value) {
+  if (value === null) return null;
+  if (!Array.isArray(value)) return undefined;
+  const cleaned = value.filter((k) => typeof k === 'string' && MODULE_KEYS.includes(k));
+  return cleaned.length ? cleaned : null;
+}
 
 const listTeam = asyncHandler(async (_req, res) => {
   const users = await User.find().select('-password').lean();
@@ -21,6 +29,8 @@ const listTeam = asyncHandler(async (_req, res) => {
     role: u.role,
     active: u.active,
     avatar: u.avatar || null,
+    permissions: u.permissions && u.permissions.length ? u.permissions : null,
+    modules: effectiveModules(u),
     assignedCount: countMap.get(String(u._id)) || 0,
   }));
 
@@ -32,11 +42,20 @@ const createValidators = [
   body('email').isEmail().normalizeEmail(),
   body('role').isIn(['admin', 'manager', 'staff']),
   body('password').isString().isLength({ min: 6 }),
+  body('permissions').optional({ nullable: true }).isArray(),
 ];
 
 const createMember = asyncHandler(async (req, res) => {
   const { name, email, role, password } = req.body;
-  const member = await User.create({ name, email, role, password, active: true });
+  const permissions = sanitizePermissions(req.body.permissions);
+  const member = await User.create({
+    name,
+    email,
+    role,
+    password,
+    active: true,
+    permissions: permissions === undefined ? null : permissions,
+  });
   res.status(201).json({
     success: true,
     member: {
@@ -45,6 +64,8 @@ const createMember = asyncHandler(async (req, res) => {
       email: member.email,
       role: member.role,
       active: member.active,
+      permissions: member.permissions && member.permissions.length ? member.permissions : null,
+      modules: effectiveModules(member),
       assignedCount: 0,
     },
   });
@@ -56,6 +77,7 @@ const updateValidators = [
   body('role').optional().isIn(['admin', 'manager', 'staff']),
   body('active').optional().isBoolean(),
   body('password').optional().isString().isLength({ min: 6 }),
+  body('permissions').optional({ nullable: true }).isArray(),
 ];
 
 const updateMember = asyncHandler(async (req, res) => {
@@ -67,6 +89,10 @@ const updateMember = asyncHandler(async (req, res) => {
   });
 
   if (req.body.password) updates.password = req.body.password;
+  if (req.body.permissions !== undefined) {
+    const permissions = sanitizePermissions(req.body.permissions);
+    if (permissions !== undefined) updates.permissions = permissions;
+  }
 
   const member = await User.findById(id);
   if (!member) return res.status(404).json({ success: false, message: 'Member not found' });
@@ -85,6 +111,8 @@ const updateMember = asyncHandler(async (req, res) => {
       role: member.role,
       active: member.active,
       avatar: member.avatar || null,
+      permissions: member.permissions && member.permissions.length ? member.permissions : null,
+      modules: effectiveModules(member),
       assignedCount,
     },
   });
