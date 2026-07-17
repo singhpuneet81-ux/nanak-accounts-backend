@@ -44,7 +44,16 @@ const listSubmissions = asyncHandler(async (req, res) => {
 
   const filter = {};
 
-  if (paymentStatus) filter.paymentStatus = paymentStatus;
+  // Expand common status aliases so dashboard filters match the counts.
+  if (paymentStatus === 'pending') {
+    filter.paymentStatus = { $in: ['pending', 'pending_payment'] };
+  } else if (paymentStatus === 'failed') {
+    filter.paymentStatus = { $in: ['failed', 'payment_failed'] };
+  } else if (paymentStatus === 'paid') {
+    filter.paymentStatus = { $in: ['paid', 'payment_complete'] };
+  } else if (paymentStatus) {
+    filter.paymentStatus = paymentStatus;
+  }
   if (serviceKey) filter.serviceKey = serviceKey;
   if (jobStatus) filter.jobStatus = jobStatus;
 
