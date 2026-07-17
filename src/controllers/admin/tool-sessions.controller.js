@@ -12,7 +12,13 @@ const listSessions = asyncHandler(async (req, res) => {
   const { page, limit, skip } = getPagination(req.query);
   const filter = { tool: req.query.tool };
   if (req.query.search) {
-    filter.title = { $regex: String(req.query.search).trim(), $options: 'i' };
+    const s = String(req.query.search).trim();
+    filter.$or = [
+      { title: { $regex: s, $options: 'i' } },
+      { createdByName: { $regex: s, $options: 'i' } },
+      { 'summary.clientName': { $regex: s, $options: 'i' } },
+      { 'summary.occName': { $regex: s, $options: 'i' } },
+    ];
   }
 
   const [items, total] = await Promise.all([

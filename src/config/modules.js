@@ -11,14 +11,25 @@ const MODULE_KEYS = [
   'careers',
   'webinars',
   'benchmarks',
+  'benchmarks-usage',
   'deduction',
+  'deduction-usage',
   'quote-pad',
   'quote-pad-pricing',
 ];
 
 const ROLE_DEFAULT_MODULES = {
   admin: [...MODULE_KEYS],
-  manager: ['dashboard', 'submissions', 'reports', 'benchmarks', 'deduction', 'quote-pad'],
+  manager: [
+    'dashboard',
+    'submissions',
+    'reports',
+    'benchmarks',
+    'benchmarks-usage',
+    'deduction',
+    'deduction-usage',
+    'quote-pad',
+  ],
   staff: ['dashboard', 'submissions', 'benchmarks', 'deduction', 'quote-pad'],
 };
 
