@@ -32,6 +32,8 @@ const listTeam = asyncHandler(async (_req, res) => {
     permissions: u.permissions && u.permissions.length ? u.permissions : null,
     modules: effectiveModules(u),
     assignedCount: countMap.get(String(u._id)) || 0,
+    lastLoginAt: u.lastLoginAt || null,
+    createdAt: u.createdAt || null,
   }));
 
   res.json(result);

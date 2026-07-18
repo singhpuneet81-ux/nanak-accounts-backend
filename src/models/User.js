@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
     permissions: { type: [String], default: null },
     active: { type: Boolean, default: true },
     avatar: { type: String, default: null },
+    lastLoginAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

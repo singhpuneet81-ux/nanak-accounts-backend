@@ -25,6 +25,10 @@ const login = asyncHandler(async (req, res) => {
     return res.status(401).json({ success: false, message: 'Invalid email or password' });
   }
 
+  // Record last successful login for Team Management visibility.
+  user.lastLoginAt = new Date();
+  await user.save({ validateBeforeSave: false });
+
   const token = signToken(user._id);
   res.json({
     success: true,
@@ -37,6 +41,7 @@ const login = asyncHandler(async (req, res) => {
       active: user.active,
       avatar: user.avatar,
       permissions: user.permissions || null,
+      lastLoginAt: user.lastLoginAt,
       modules: effectiveModules(user),
     },
   });
