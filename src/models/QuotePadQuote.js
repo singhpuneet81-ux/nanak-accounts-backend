@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const quotePadQuoteSchema = new mongoose.Schema(
   {
     number: { type: Number, required: true, index: true },
-    kind: { type: String, enum: ['household', 'entity'], required: true },
+    kind: { type: String, enum: ['household', 'entity', 'registrations'], required: true },
     label: { type: String, default: '' },
     structure: { type: String, default: 'household' },
     title: { type: String, default: '' },

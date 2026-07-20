@@ -2,9 +2,13 @@ const { body, param } = require('express-validator');
 const QuotePadConfig = require('../models/QuotePadConfig');
 const QuotePadQuote = require('../models/QuotePadQuote');
 const { asyncHandler } = require('../middleware/asyncHandler');
-const { defaultQuotePadConfig } = require('../data/quotePadDefaults');
+const {
+  defaultQuotePadConfig,
+  mergeHouseholdConfig,
+  mergeBusinessConfig,
+} = require('../data/quotePadDefaults');
 
-// Deep-merge saved config over defaults so newly added keys always exist.
+// Deep-merge saved firm config over defaults so newly added keys always exist.
 function mergeDeep(base, saved) {
   if (Array.isArray(base)) return Array.isArray(saved) ? saved : base;
   if (base && typeof base === 'object') {
@@ -24,8 +28,8 @@ function mergedConfig(doc) {
   if (!doc) return defaults;
   return {
     firm: mergeDeep(defaults.firm, doc.firm || {}),
-    household: mergeDeep(defaults.household, doc.household || {}),
-    business: mergeDeep(defaults.business, doc.business || {}),
+    household: mergeHouseholdConfig(doc.household || {}),
+    business: mergeBusinessConfig(doc.business || {}),
   };
 }
 
@@ -74,7 +78,7 @@ const getQuote = asyncHandler(async (req, res) => {
 });
 
 const quoteValidators = [
-  body('kind').isIn(['household', 'entity']),
+  body('kind').isIn(['household', 'entity', 'registrations']),
   body('title').isString().notEmpty(),
   body('data').isObject(),
   body('total').optional().isNumeric(),
@@ -89,7 +93,7 @@ const createQuote = asyncHandler(async (req, res) => {
     number,
     kind: req.body.kind,
     label: req.body.label || '',
-    structure: req.body.structure || (req.body.kind === 'household' ? 'household' : 'entity'),
+    structure: req.body.structure || (req.body.kind === 'household' ? 'household' : req.body.kind === 'registrations' ? 'registrations' : 'entity'),
     title: req.body.title,
     total: Number(req.body.total) || 0,
     data: req.body.data,

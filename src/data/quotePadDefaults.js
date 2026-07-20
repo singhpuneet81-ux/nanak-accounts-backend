@@ -1,6 +1,5 @@
-// Default pricing configuration for the Quote Pad module.
-// Ported from nanak-household-quote-pad-v2.html — every value here is
-// editable from the admin panel (Quote Pad → Prices) and stored in Mongo.
+// Default pricing configuration for the Quote Pad module (v3).
+// Ported from nanak-quote-pad-v3.html — editable from Admin → Nanak Quotations → Prices.
 
 const B_BANDS = [
   ['0–100k', 1250], ['100–150k', 1450], ['150–200k', 1650], ['200–250k', 1850],
@@ -25,8 +24,8 @@ function defaultFirm() {
     phone: '1300 626 258',
     email: 'info@nanakaccountants.com.au',
     validDays: 14,
-    gst: 0.10,
-    maxDiscountPct: 20,
+    gst: 0.1,
+    maxDiscountPct: 40,
   };
 }
 
@@ -49,7 +48,13 @@ function defaultHouseholdConfig() {
     cryptoSummary: 75,
     cryptoReview: 150,
     cryptoComplexStartingPrice: 300,
-    // Sole trader TOTAL fee (replaces the individual base). Last band = accountant review.
+    koinlyTiers: [
+      ['Up to 100 transactions (Newbie)', 79],
+      ['Up to 1,000 transactions (Hodler)', 159],
+      ['Up to 3,000 transactions (Trader)', 319],
+      ['Up to 10,000 transactions (Trader)', 319],
+      ['More than 10,000 — custom quote', 0],
+    ],
     soleTraderBands: [
       ['$0 – $75k', 160],
       ['$75k – $150k', 250],
@@ -61,17 +66,286 @@ function defaultHouseholdConfig() {
     foreign: 100,
     basPerLodgement: 100,
     basMinorReconciliation: 50,
+    basNilLodgement: 35,
     strategicPlanning: 150,
   };
 }
 
+function defaultSetups() {
+  return [
+    {
+      id: 'company_reg',
+      code: 'COMPANYSETUP',
+      cat: 'Structure',
+      name: 'Pty Ltd company + ABN/TFN/GST/PAYG',
+      price: 1245,
+      gov: true,
+      note: 'ASIC company registration, standard company documents, ABN, TFN, GST and PAYG. ASIC registration fee included.',
+      includes: [
+        'ASIC company registration & ACN',
+        'Company constitution',
+        'Certificate of registration',
+        'Share certificate(s)',
+        'Member & officeholder registers',
+        'ABN, TFN, GST & PAYG registration',
+        'ASIC corporate key & first-meeting minutes',
+      ],
+    },
+    {
+      id: 'family_trust',
+      code: 'FAMILYTRUSTSET',
+      cat: 'Structure',
+      name: 'Family trust — corporate trustee',
+      price: 1595,
+      gov: false,
+      sro: true,
+      note: 'Trust deed, corporate trustee, ABN/TFN. SRO stamp duty is paid by the client at the rate for their state.',
+      includes: [
+        'Discretionary (family) trust deed',
+        'Appointor, trustee & settlor documentation',
+        'Establishment minutes & resolutions',
+        'ABN & TFN registration',
+        'Stamping guidance (SRO duty paid by client)',
+      ],
+    },
+    {
+      id: 'unit_trust',
+      code: 'UNITTRUSTESTVI',
+      cat: 'Structure',
+      name: 'Unit trust — corporate trustee',
+      price: 1595,
+      gov: false,
+      sro: true,
+      note: 'Trust deed, unit register, corporate trustee, ABN/TFN. SRO stamp duty is paid by the client at the rate for their state.',
+      includes: [
+        'Unit trust deed',
+        'Unit register & unit certificates',
+        'Establishment minutes & resolutions',
+        'ABN & TFN registration',
+        'Stamping guidance (SRO duty paid by client)',
+      ],
+    },
+    {
+      id: 'partnership_setup',
+      code: 'PARTNERSHIPSETUPS',
+      cat: 'Structure',
+      name: 'Partnership setup',
+      price: 299,
+      gov: false,
+      note: 'Partnership registration, ABN/TFN. Government fees excluded.',
+      includes: [
+        'Partnership agreement referral',
+        'ABN & TFN registration',
+        'GST registration (if required)',
+        'Partnership establishment guidance',
+      ],
+    },
+    {
+      id: 'acnc_corp',
+      code: 'ACNCCHARITABLETRUSTW1',
+      cat: 'Structure',
+      name: 'ACNC charitable trust with corporate trustee (Pty Ltd)',
+      price: 1800,
+      gov: false,
+      note: 'Charitable trust with corporate trustee. Government fees excluded.',
+      includes: [
+        'Charitable trust deed',
+        'Corporate trustee (Pty Ltd) with ASIC registration',
+        'ACNC charity registration application',
+        'ABN & TFN registration',
+        'Governing-document & DGR guidance',
+      ],
+    },
+    {
+      id: 'acnc_incorp',
+      code: 'ACNCCHARITABLETRUSTW2',
+      cat: 'Structure',
+      name: 'ACNC charitable trust with incorporation',
+      price: 1350,
+      gov: false,
+      note: 'Charitable trust with incorporated association. Government fees excluded.',
+      includes: [
+        'Charitable trust with incorporated association',
+        'ACNC charity registration application',
+        'Governing rules / constitution',
+        'ABN & TFN registration',
+        'DGR guidance',
+      ],
+    },
+    {
+      id: 'smsf_corp',
+      code: 'SMSFTRUSTWITHCORPORA',
+      cat: 'SMSF',
+      name: 'SMSF setup — corporate trustee',
+      price: 2000,
+      gov: true,
+      note: 'Full SMSF establishment with special-purpose corporate trustee — ASIC, legal deed, first-year software and setup accounting.',
+      components: [
+        ['ASIC fee — special-purpose corporate trustee', 636],
+        ['Legal fees — SMSF deed', 400],
+        ['Class Super software — first-year fee', 250],
+        ['Setup accounting — audit file, rollover, ABN/TFN, bank-account file prep', 714],
+      ],
+      includes: [
+        'Special-purpose corporate trustee (ASIC)',
+        'SMSF trust deed',
+        'Trustee consents & member applications',
+        'ABN & TFN registration',
+        'Electronic service address (ESA)',
+        'Rollover & bank-account setup file',
+      ],
+    },
+    {
+      id: 'bare_trust',
+      code: 'BARETRUSTWITHCORPORA',
+      cat: 'SMSF',
+      name: 'Bare trust / LRBA — corporate trustee',
+      price: 1645,
+      gov: true,
+      note: 'Bare trust for limited recourse borrowing, corporate trustee. Includes government charges.',
+      includes: [
+        'Bare trust deed (LRBA)',
+        'Corporate trustee for the bare trust',
+        'Holding-trust documentation',
+        'Lender-ready limited recourse borrowing pack',
+      ],
+    },
+    {
+      id: 'abn_reg',
+      code: 'REGISTRATION1',
+      cat: 'Registration',
+      name: 'ABN application support',
+      price: 105,
+      gov: true,
+      note: 'Australian Business Number application and support.',
+    },
+    {
+      id: 'gst_reg',
+      code: 'REGISTRATION2',
+      cat: 'Registration',
+      name: 'GST registration',
+      price: 49,
+      gov: true,
+      note: 'GST registration with the ATO.',
+    },
+    {
+      id: 'gst_dereg',
+      code: 'REGISTRATION3',
+      cat: 'Registration',
+      name: 'Deregistration of GST',
+      price: 49,
+      gov: true,
+      note: 'Cancellation of GST registration.',
+    },
+    {
+      id: 'tfn_reg',
+      code: 'REGISTRATION4',
+      cat: 'Registration',
+      name: 'TFN registration',
+      price: 99,
+      gov: true,
+      note: 'Tax File Number application.',
+    },
+    {
+      id: 'bn_reg_1yr',
+      code: 'REGISTRATION5',
+      cat: 'Registration',
+      name: 'Business name — 1 year',
+      price: 115,
+      gov: true,
+      note: 'ASIC business name registration for 1 year. ASIC fee included.',
+    },
+    {
+      id: 'bn_reg_3yr',
+      code: 'REGISTRATION5B',
+      cat: 'Registration',
+      name: 'Business name — 3 years',
+      price: 215,
+      gov: true,
+      note: 'ASIC business name registration for 3 years. ASIC fee included.',
+    },
+    {
+      id: 'bn_transfer',
+      code: 'REGISTRATION6',
+      cat: 'Registration',
+      name: 'Business name transfer',
+      price: 250,
+      gov: false,
+      note: 'ASIC fees excluded — payable by client.',
+    },
+    {
+      id: 'asic_address',
+      code: 'ADDRESSUPDATES',
+      cat: 'ASIC',
+      name: 'Address updates',
+      price: 0,
+      gov: true,
+      note: 'No charge.',
+    },
+    {
+      id: 'asic_shareholder',
+      code: 'COMPANYSHAREHOLDERCH',
+      cat: 'ASIC',
+      name: 'Company shareholder changes',
+      price: 200,
+      gov: false,
+      note: 'ASIC lodgement fees excluded.',
+    },
+    {
+      id: 'asic_director',
+      code: 'COMPANYDIRECTORSHIPC',
+      cat: 'ASIC',
+      name: 'Company directorship changes',
+      price: 200,
+      gov: false,
+      note: 'ASIC lodgement fees excluded.',
+    },
+    {
+      id: 'asic_unitholder',
+      code: 'UNITHOLDERCHANGES',
+      cat: 'ASIC',
+      name: 'Unit holder changes',
+      price: 200,
+      gov: false,
+      note: 'Unit register update and documentation.',
+    },
+    {
+      id: 'asic_closure',
+      code: 'COMPANYCLOSURE',
+      cat: 'ASIC',
+      name: 'Company closure / deregistration',
+      price: 250,
+      gov: false,
+      note: 'ASIC deregistration fee excluded.',
+    },
+    {
+      id: 'asic_namechange',
+      code: 'COMPANYNAMECHANGE',
+      cat: 'ASIC',
+      name: 'Company name change',
+      price: 250,
+      gov: false,
+      note: 'ASIC fee excluded.',
+    },
+    {
+      id: 'payroll_setup',
+      code: 'ONETIMEPAYROLLSETUP',
+      cat: 'Payroll',
+      name: 'One-time payroll set up',
+      price: 250,
+      gov: false,
+      note: 'Payroll software setup, STP registration and configuration.',
+    },
+  ];
+}
+
 function defaultBusinessConfig() {
-  const factors = { Company: 1.0, Trust: 0.95, 'Family Trust': 0.95, Partnership: 0.72 };
+  const factors = { Company: 1.0, Trust: 1.0, 'Family Trust': 1.0, Partnership: 0.72 };
   const existingRates = {};
   const newRates = {};
   B_BAND_ENTITIES.forEach((e) => {
     existingRates[e] = B_BANDS.map((b) => (e === 'Company' ? b[1] : bRound50(b[1] * factors[e])));
-    newRates[e] = existingRates[e].map((v) => bRound50(v * 0.85));
+    newRates[e] = existingRates[e].slice();
   });
 
   return {
@@ -80,14 +354,14 @@ function defaultBusinessConfig() {
     newRates,
     smsf: {
       existing: [
-        ['Simple (1–2 members)', 1650],
-        ['Standard (pension / 3–4)', 2200],
-        ['Complex (LRBA / property)', 2900],
+        ['Basic Fund', 1300],
+        ['Complex', 1600],
+        ['Very Complex', 2000],
       ],
       neu: [
-        ['Simple (1–2 members)', 1400],
-        ['Standard (pension / 3–4)', 1870],
-        ['Complex (LRBA / property)', 2465],
+        ['Basic Fund', 1300],
+        ['Complex', 1600],
+        ['Very Complex', 2000],
       ],
     },
     nfp: {
@@ -113,31 +387,18 @@ function defaultBusinessConfig() {
     advisoryUpgrade: 1000,
     payroll: {
       supportFlat: 330,
-      process: {
-        Monthly: { '1–3': 720, '4–5': 960, '6–10': 1440, '11–15': 2100, 'More than 15 – owner review': 0 },
-        Fortnightly: { '1–3': 1200, '4–5': 1500, '6–10': 2200, '11–15': 3200, 'More than 15 – owner review': 0 },
-        Weekly: { '1–3': 1800, '4–5': 2200, '6–10': 3200, '11–15': 4800, 'More than 15 – owner review': 0 },
-      },
+      perHeadMonth: 10,
+      softwarePerHeadMonth: 4,
     },
-    bookkeeping: { quarterly: 1320, monthly: 2640, cleanup: 990 },
     monthlyBasUplift: 600,
     propertyIncluded: 1,
     propertyExtra: 250,
     shareLargeFrom: 250,
-    setups: [
-      { id: 'company_reg', name: 'Company registration & setup', price: 950, gov: true, note: 'ASIC registration, ABN/TFN/GST. ASIC fee included.' },
-      { id: 'trust_est', name: 'Trust establishment', price: 660, gov: false, note: 'Trust deed, ABN/TFN. Stamp duty excluded.' },
-      { id: 'company_trust', name: 'Company + trust establishment', price: 1500, gov: true, note: 'Corporate trustee + trust. ASIC fee included.' },
-      { id: 'smsf_setup', name: 'SMSF establishment', price: 1650, gov: false, note: 'Fund deed, trustee, ABN/TFN. Gov fees excluded.' },
-      { id: 'smsf_corp', name: 'New SMSF + corporate trustee', price: 2200, gov: true, note: 'SMSF + special-purpose trustee. ASIC fee included.' },
-      { id: 'bare_trust', name: 'Bare trust setup (LRBA)', price: 880, gov: false, note: 'Bare trust deed. Gov fees excluded.' },
-      { id: 'partnership_setup', name: 'New partnership setup', price: 550, gov: false, note: 'Agreement referral, ABN/TFN, GST. Gov fees excluded.' },
-      { id: 'nfp_incorp', name: 'Incorporated Association setup', price: 1500, gov: false, note: 'Rules & registration. State fee excluded.' },
-      { id: 'nfp_clg', name: 'Company Limited by Guarantee setup', price: 2200, gov: true, note: 'Constitution & ASIC registration. ASIC fee included.' },
-      { id: 'nfp_ctrust', name: 'Charitable Trust setup', price: 1800, gov: false, note: 'Charitable trust deed. Gov fees excluded.' },
-      { id: 'nfp_acnc', name: 'ACNC charity registration', price: 1100, gov: true, note: 'ACNC application (no ACNC fee applies).' },
-      { id: 'nfp_dgr', name: 'DGR application', price: 1500, gov: false, note: 'DGR endorsement application.' },
-    ],
+    smsfNewLoading: 0,
+    bundleAccountingPct: 50,
+    newClientDiscount: 30,
+    basQuarterCredit: 150,
+    setups: defaultSetups(),
     addons: [
       { id: 'fbt', name: 'FBT return', price: 880, oneOff: false },
       { id: 'tpar', name: 'TPAR lodgement', price: 330, oneOff: false },
@@ -156,6 +417,7 @@ function defaultBusinessConfig() {
       { id: 'smsf_contrib', name: 'Contribution caps & TSB review', price: 180, oneOff: false },
       { id: 'smsf_inhouse', name: 'In-house asset / compliance review', price: 300, oneOff: false },
       { id: 'smsf_software', name: 'Fund software migration / setup', price: 300, oneOff: true },
+      { id: 'smsf_classsuper', name: 'Class Super software (annual, per fund)', price: 250, oneOff: false },
       { id: 'smsf_windup', name: 'SMSF wind-up / rollover', price: 900, oneOff: true },
     ],
     addonsNFP: [
@@ -179,4 +441,93 @@ function defaultQuotePadConfig() {
   };
 }
 
-module.exports = { defaultQuotePadConfig, defaultFirm, defaultHouseholdConfig, defaultBusinessConfig };
+/** Merge saved business config with v3 defaults (setups/addons by id, payroll fields). */
+function mergeBusinessConfig(saved) {
+  const c = defaultBusinessConfig();
+  if (!saved || typeof saved !== 'object') return c;
+
+  const out = { ...c, ...saved };
+
+  // Prefer saved rate tables when present
+  if (saved.existingRates) out.existingRates = saved.existingRates;
+  if (saved.newRates) out.newRates = saved.newRates;
+  if (saved.bandLabels) out.bandLabels = saved.bandLabels;
+  if (saved.smsf) out.smsf = saved.smsf;
+  if (saved.nfp) out.nfp = saved.nfp;
+  if (saved.planning) out.planning = { ...c.planning, ...saved.planning };
+
+  out.payroll = {
+    supportFlat: saved.payroll?.supportFlat != null ? saved.payroll.supportFlat : c.payroll.supportFlat,
+    perHeadMonth: saved.payroll?.perHeadMonth != null ? saved.payroll.perHeadMonth : c.payroll.perHeadMonth,
+    softwarePerHeadMonth:
+      saved.payroll?.softwarePerHeadMonth != null
+        ? saved.payroll.softwarePerHeadMonth
+        : c.payroll.softwarePerHeadMonth,
+  };
+
+  [
+    'propertyIncluded',
+    'propertyExtra',
+    'shareLargeFrom',
+    'monthlyBasUplift',
+    'advisoryUpgrade',
+    'smsfNewLoading',
+    'bundleAccountingPct',
+    'newClientDiscount',
+    'basQuarterCredit',
+  ].forEach((k) => {
+    if (saved[k] == null) out[k] = c[k];
+  });
+
+  // Setups: filter deprecated, keep saved prices, append missing defaults by id
+  let setups = Array.isArray(saved.setups) ? saved.setups.filter((x) => x && x.id !== 'asic_annual') : [];
+  const byId = new Map(setups.map((s) => [s.id, s]));
+  c.setups.forEach((def) => {
+    if (!byId.has(def.id)) setups.push(def);
+  });
+  out.setups = setups.length ? setups : c.setups;
+
+  function mergeAddons(defList, savedList) {
+    if (!Array.isArray(savedList)) return defList.slice();
+    const merged = savedList.slice();
+    defList.forEach((a) => {
+      if (!merged.some((x) => x.id === a.id)) merged.push(a);
+    });
+    return merged;
+  }
+  out.addons = mergeAddons(c.addons, saved.addons);
+  out.addonsSMSF = mergeAddons(c.addonsSMSF, saved.addonsSMSF);
+  out.addonsNFP = mergeAddons(c.addonsNFP, saved.addonsNFP);
+
+  return out;
+}
+
+function mergeHouseholdConfig(saved) {
+  const c = defaultHouseholdConfig();
+  if (!saved || typeof saved !== 'object') return c;
+  const out = { ...c };
+  Object.keys(c).forEach((k) => {
+    if (k === 'soleTraderBands') {
+      if (Array.isArray(saved.soleTraderBands) && saved.soleTraderBands.length === 5) {
+        out.soleTraderBands = saved.soleTraderBands;
+      }
+    } else if (k === 'koinlyTiers') {
+      if (Array.isArray(saved.koinlyTiers) && saved.koinlyTiers.length === 5) {
+        out.koinlyTiers = saved.koinlyTiers;
+      }
+    } else if (saved[k] !== undefined && typeof saved[k] === typeof c[k]) {
+      out[k] = saved[k];
+    }
+  });
+  if (saved.basNilLodgement != null) out.basNilLodgement = saved.basNilLodgement;
+  return out;
+}
+
+module.exports = {
+  defaultQuotePadConfig,
+  defaultFirm,
+  defaultHouseholdConfig,
+  defaultBusinessConfig,
+  mergeBusinessConfig,
+  mergeHouseholdConfig,
+};
