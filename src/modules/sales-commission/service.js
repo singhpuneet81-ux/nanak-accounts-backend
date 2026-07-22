@@ -305,8 +305,8 @@ async function addPayment(actor, dealId, body) {
   if (!ENG.won(deal) || deal.voided) throw Object.assign(new Error('Deal must be signed'), { status: 400 });
 
   const gross = Math.round(Number(body.grossCents ?? body.gross * 100));
-  const gst = Math.round(Number(body.gstCents ?? body.gst * 100 || 0));
-  const excluded = Math.round(Number(body.excludedCents ?? body.excluded * 100 || 0));
+  const gst = Math.round(Number(body.gstCents ?? (body.gst * 100 || 0)));
+  const excluded = Math.round(Number(body.excludedCents ?? (body.excluded * 100 || 0)));
   if (!(gross > 0)) throw Object.assign(new Error('Gross must be > 0'), { status: 400 });
   if (gst < 0 || excluded < 0 || gst + excluded > gross) {
     throw Object.assign(new Error('Invalid GST/exclusions'), { status: 400 });
@@ -1339,8 +1339,8 @@ async function preview(body) {
   const rate = body.rate != null ? Number(body.rate) : await currentRate(body.signedAt);
   return ENG.previewCommission({
     type: body.type || 'new',
-    annualFeeCents: Math.round(Number(body.annualFeeCents ?? body.annualFee * 100 || 0)),
-    prevFeeCents: Math.round(Number(body.prevFeeCents ?? body.prevFee * 100 || 0)),
+    annualFeeCents: Math.round(Number(body.annualFeeCents ?? (body.annualFee * 100 || 0))),
+    prevFeeCents: Math.round(Number(body.prevFeeCents ?? (body.prevFee * 100 || 0))),
     rate,
   });
 }
