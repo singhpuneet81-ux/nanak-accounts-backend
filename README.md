@@ -70,6 +70,12 @@ These are included to match your `API_DOCUMENTATION.md` version too:
 - `POST /api/webhooks/stripe` (raw body)
 - alias: `POST /api/stripe-webhook`
 
+### Sales & Commission Hub (Bearer + module `sales-commission`)
+- Mounted at `/api/admin/sales-commission/*`
+- Seed demo data (Puneet admin, India staff, FY 2026-27): `npm run seed:sales-commission`
+- Default seed password: `Nanak@2026` (override with `SALES_SEED_PASSWORD`)
+- Key routes: `/dashboard`, `/deals`, `/payments/*`, `/ledger`, `/payout-batches`, `/clawbacks`, `/queries`, `/targets`, `/settings`, `/audit`, `/acceptance-tests/run`
+
 ## 3) Notes
 - **JWT logout is stateless** (frontend deletes token).
 - Stripe webhook updates `paymentStatus` to `paid/failed/refunded`.

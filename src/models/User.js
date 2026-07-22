@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema(
     active: { type: Boolean, default: true },
     avatar: { type: String, default: null },
     lastLoginAt: { type: Date, default: null },
+    // Sales & Commission Hub fields
+    office: { type: String, enum: ['India', 'Australia'], default: null },
+    commissionEligible: { type: Boolean, default: false },
+    managerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   },
   { timestamps: true }
 );

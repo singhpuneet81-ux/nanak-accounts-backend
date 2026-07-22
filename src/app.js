@@ -20,6 +20,7 @@ const toolSessionsRoutes = require('./routes/admin/tool-sessions.routes');
 const submissionsRoutes = require('./routes/admin/submissions.routes');
 const teamRoutes = require('./routes/admin/team.routes');
 const quotePadRoutes = require('./routes/admin/quote-pad.routes');
+const salesCommissionRoutes = require('./routes/admin/sales-commission.routes');
 const reportsRoutes = require('./routes/admin/reports.routes');
 const accountingPricing = require('./routes/accounting-pricing.routes');
 const solensmsf = require('./routes/sole-trader-pricing.routes');
@@ -135,6 +136,7 @@ app.use('/api/admin/tool-sessions', toolSessionsRoutes);
 app.use('/api/admin/submissions', submissionsRoutes);
 app.use('/api/admin/team', teamRoutes);
 app.use('/api/admin/quote-pad', quotePadRoutes);
+app.use('/api/admin/sales-commission', salesCommissionRoutes);
 app.use('/api/admin/reports', reportsRoutes);
 app.use('/api/admin/accounting-pricing', accountingPricing);
 

@@ -16,6 +16,7 @@ const MODULE_KEYS = [
   'deduction-usage',
   'quote-pad',
   'quote-pad-pricing',
+  'sales-commission',
 ];
 
 const ROLE_DEFAULT_MODULES = {
@@ -29,8 +30,9 @@ const ROLE_DEFAULT_MODULES = {
     'deduction',
     'deduction-usage',
     'quote-pad',
+    'sales-commission',
   ],
-  staff: ['dashboard', 'submissions', 'benchmarks', 'deduction', 'quote-pad'],
+  staff: ['dashboard', 'submissions', 'benchmarks', 'deduction', 'quote-pad', 'sales-commission'],
 };
 
 function effectiveModules(user) {

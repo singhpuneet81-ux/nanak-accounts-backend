@@ -10,7 +10,8 @@
     "seed": "node src/utils/seedAdmin.js",
     "seed:pricing": "node seeders/pricingSeeder.js",
     "seed:accounting": "node src/accounting-pricing.seeder.js",
-    "seed:benchmarks": "node src/seeds/benchmark.seed.js"
+    "seed:benchmarks": "node src/seeds/benchmark.seed.js",
+    "seed:sales-commission": "node src/seeds/salesCommission.seed.js"
   },
   "engines": {
     "node": ">=18.0.0"
