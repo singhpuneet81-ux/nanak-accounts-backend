@@ -1,4 +1,4 @@
-const asyncHandler = require('../middleware/asyncHandler');
+const { asyncHandler } = require('../middleware/asyncHandler');
 const { getPagination } = require('../utils/pagination');
 const svc = require('../modules/sales-commission/service');
 const { runAcceptanceTests } = require('../modules/sales-commission/acceptance');
