@@ -6,6 +6,7 @@ const MODULE_KEYS = [
   'dashboard',
   'submissions',
   'team',
+  'client-management',
   'reports',
   'pricing',
   'careers',
@@ -24,6 +25,7 @@ const ROLE_DEFAULT_MODULES = {
   manager: [
     'dashboard',
     'submissions',
+    'client-management',
     'reports',
     'benchmarks',
     'benchmarks-usage',
@@ -32,7 +34,15 @@ const ROLE_DEFAULT_MODULES = {
     'quote-pad',
     'sales-commission',
   ],
-  staff: ['dashboard', 'submissions', 'benchmarks', 'deduction', 'quote-pad', 'sales-commission'],
+  staff: [
+    'dashboard',
+    'submissions',
+    'client-management',
+    'benchmarks',
+    'deduction',
+    'quote-pad',
+    'sales-commission',
+  ],
 };
 
 function effectiveModules(user) {

@@ -1,0 +1,116 @@
+const { asyncHandler } = require('../middleware/asyncHandler');
+const svc = require('../modules/client-management/service');
+const { seedClientManagement } = require('../seeds/clientManagement.seed');
+
+exports.getMeta = asyncHandler(async (req, res) => {
+  const meta = await svc.getMeta(req.user);
+  res.json({ success: true, meta });
+});
+
+exports.getDashboard = asyncHandler(async (req, res) => {
+  const data = await svc.getDashboard(req.user);
+  res.json({ success: true, ...data });
+});
+
+exports.listClients = asyncHandler(async (req, res) => {
+  const data = await svc.listClients(req.user, req.query);
+  res.json({ success: true, ...data });
+});
+
+exports.getClient = asyncHandler(async (req, res) => {
+  const data = await svc.getClient(req.user, req.params.id);
+  res.json({ success: true, ...data });
+});
+
+exports.createClient = asyncHandler(async (req, res) => {
+  const client = await svc.createClient(req.user, req.body);
+  res.status(201).json({ success: true, client });
+});
+
+exports.updateClient = asyncHandler(async (req, res) => {
+  const client = await svc.updateClient(req.user, req.params.id, req.body);
+  res.json({ success: true, client });
+});
+
+exports.getAllocation = asyncHandler(async (req, res) => {
+  const data = await svc.getAllocation(req.user);
+  res.json({ success: true, ...data });
+});
+
+exports.listGroups = asyncHandler(async (req, res) => {
+  const data = await svc.listGroups(req.user);
+  res.json({ success: true, ...data });
+});
+
+exports.createGroup = asyncHandler(async (req, res) => {
+  const group = await svc.createGroup(req.user, req.body);
+  res.status(201).json({ success: true, group });
+});
+
+exports.getPayments = asyncHandler(async (req, res) => {
+  const data = await svc.getPayments(req.user, req.query);
+  res.json({ success: true, ...data });
+});
+
+exports.applyFeeUplift = asyncHandler(async (req, res) => {
+  const data = await svc.applyFeeUplift(req.user, req.body);
+  res.json({ success: true, ...data });
+});
+
+exports.reconcileXero = asyncHandler(async (req, res) => {
+  const data = await svc.reconcileXero(req.user, req.body);
+  res.json({ success: true, ...data });
+});
+
+exports.getPayroll = asyncHandler(async (req, res) => {
+  const data = await svc.getPayroll(req.user, req.query);
+  res.json({ success: true, ...data });
+});
+
+exports.updatePayrollRun = asyncHandler(async (req, res) => {
+  const data = await svc.updatePayrollRun(req.user, req.body);
+  res.json({ success: true, ...data });
+});
+
+exports.getLodgement = asyncHandler(async (req, res) => {
+  const data = await svc.getLodgement(req.user);
+  res.json({ success: true, ...data });
+});
+
+exports.getReminders = asyncHandler(async (req, res) => {
+  const data = await svc.getReminders(req.user);
+  res.json({ success: true, ...data });
+});
+
+exports.exportReminders = asyncHandler(async (req, res) => {
+  const data = await svc.exportReminders(req.user, req.body);
+  res.json({ success: true, ...data });
+});
+
+exports.startFY = asyncHandler(async (req, res) => {
+  const meta = await svc.startFY(req.user, req.body);
+  res.json({ success: true, meta });
+});
+
+exports.advanceQuarter = asyncHandler(async (req, res) => {
+  const meta = await svc.advanceQuarter(req.user, req.body);
+  res.json({ success: true, meta });
+});
+
+exports.importClients = asyncHandler(async (req, res) => {
+  const data = await svc.importClients(req.user, req.body);
+  res.json({ success: true, ...data });
+});
+
+exports.exportClients = asyncHandler(async (req, res) => {
+  const data = await svc.exportClients(req.user);
+  res.json({ success: true, ...data });
+});
+
+exports.seed = asyncHandler(async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Admin only' });
+  }
+  const data = await seedClientManagement({ force: !!req.body?.force });
+  res.json({ success: true, ...data });
+});
