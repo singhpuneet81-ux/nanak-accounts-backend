@@ -7,6 +7,12 @@ const {
   mergeHouseholdConfig,
   mergeBusinessConfig,
 } = require('../data/quotePadDefaults');
+const {
+  buildPriceBookRows,
+  applyPriceBookRows,
+  rowsToXlsxBuffer,
+  bufferToRows,
+} = require('../utils/quotePadPriceBook');
 
 // Deep-merge saved firm config over defaults so newly added keys always exist.
 function mergeDeep(base, saved) {
@@ -62,6 +68,75 @@ const updateConfig = asyncHandler(async (req, res) => {
 const resetConfig = asyncHandler(async (req, res) => {
   await QuotePadConfig.deleteOne({ key: 'default' });
   res.json({ success: true, config: defaultQuotePadConfig() });
+});
+
+function sendPriceBookXlsx(res, rows, filename) {
+  const buf = rowsToXlsxBuffer(rows);
+  res.setHeader(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  );
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.send(buf);
+}
+
+/** GET — export live merged business prices as .xlsx */
+const exportPriceBook = asyncHandler(async (_req, res) => {
+  const doc = await QuotePadConfig.findOne({ key: 'default' }).lean();
+  const config = mergedConfig(doc);
+  const rows = buildPriceBookRows(config.business);
+  const stamp = new Date().toISOString().slice(0, 10);
+  sendPriceBookXlsx(res, rows, `nanak-price-book-${stamp}.xlsx`);
+});
+
+/** GET — demo template with headers + sample rows from defaults */
+const downloadPriceBookDemo = asyncHandler(async (_req, res) => {
+  const defaults = defaultQuotePadConfig();
+  const rows = buildPriceBookRows(defaults.business);
+  sendPriceBookXlsx(res, rows, 'nanak-price-book-demo.xlsx');
+});
+
+/** POST multipart — import .xlsx, update business prices, persist */
+const importPriceBook = asyncHandler(async (req, res) => {
+  if (!req.file || !req.file.buffer) {
+    return res.status(400).json({ success: false, message: 'Excel file is required (field: file)' });
+  }
+  const name = String(req.file.originalname || '').toLowerCase();
+  if (!/\.(xlsx|xls)$/.test(name) && !String(req.file.mimetype || '').includes('sheet')) {
+    // Still try to parse — multer may set generic mime; only hard-fail empty
+  }
+
+  let rows;
+  try {
+    rows = bufferToRows(req.file.buffer);
+  } catch (err) {
+    const status = err.status || 400;
+    return res.status(status).json({ success: false, message: err.message || 'Invalid Excel file' });
+  }
+
+  const doc = await QuotePadConfig.findOne({ key: 'default' }).lean();
+  const current = mergedConfig(doc);
+  const { updated, skipped, business } = applyPriceBookRows(current.business, rows);
+
+  const saved = await QuotePadConfig.findOneAndUpdate(
+    { key: 'default' },
+    {
+      $set: {
+        business,
+        firm: current.firm,
+        household: current.household,
+        updatedBy: req.user._id,
+      },
+    },
+    { new: true, upsert: true }
+  ).lean();
+
+  res.json({
+    success: true,
+    updated,
+    skipped,
+    config: mergedConfig(saved),
+  });
 });
 
 // ─── Saved quotes ───
@@ -135,6 +210,9 @@ module.exports = {
   updateConfig,
   updateConfigValidators,
   resetConfig,
+  exportPriceBook,
+  downloadPriceBookDemo,
+  importPriceBook,
   listQuotes,
   getQuote,
   createQuote,
