@@ -1,6 +1,6 @@
 const { asyncHandler } = require('../middleware/asyncHandler');
 const svc = require('../modules/client-management/service');
-const { seedClientManagement } = require('../seeds/clientManagement.seed');
+const { seedClientManagement, clearClientManagement } = require('../seeds/clientManagement.seed');
 
 exports.getMeta = asyncHandler(async (req, res) => {
   const meta = await svc.getMeta(req.user);
@@ -112,5 +112,13 @@ exports.seed = asyncHandler(async (req, res) => {
     return res.status(403).json({ success: false, message: 'Admin only' });
   }
   const data = await seedClientManagement({ force: !!req.body?.force });
+  res.json({ success: true, ...data });
+});
+
+exports.clearSeed = asyncHandler(async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Admin only' });
+  }
+  const data = await clearClientManagement();
   res.json({ success: true, ...data });
 });

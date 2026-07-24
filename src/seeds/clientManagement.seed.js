@@ -388,4 +388,37 @@ async function seedClientManagement({ force = false } = {}) {
   return { seeded: true, count: docs.length, groups: 2, staff: STAFF_NAMES.length };
 }
 
-module.exports = { seedClientManagement };
+async function clearClientManagement() {
+  const [clients, groups, overrides] = await Promise.all([
+    PracticeClient.deleteMany({}),
+    PracticeGroup.deleteMany({}),
+    PracticePayrollOverride.deleteMany({}),
+  ]);
+  // Reset FY settings to defaults (keep singleton doc)
+  await PracticeSettings.findOneAndUpdate(
+    { singleton: 'default' },
+    {
+      $set: {
+        activeFy: '2025-26',
+        currentQuarter: 'q4',
+        todayOverride: null,
+        offices: OFFICES,
+        quarters: [
+          { k: 'q1', l: 'Sep 25', due: '28 Oct 2025' },
+          { k: 'q2', l: 'Dec 25', due: '28 Feb 2026' },
+          { k: 'q3', l: 'Mar 26', due: '28 Apr 2026' },
+          { k: 'q4', l: 'Jun 26', due: '28 Jul 2026' },
+        ],
+      },
+    },
+    { upsert: true }
+  );
+  return {
+    cleared: true,
+    clientsDeleted: clients.deletedCount || 0,
+    groupsDeleted: groups.deletedCount || 0,
+    payrollOverridesDeleted: overrides.deletedCount || 0,
+  };
+}
+
+module.exports = { seedClientManagement, clearClientManagement };

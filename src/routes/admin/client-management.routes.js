@@ -35,5 +35,6 @@ router.post('/fy/start', c.startFY);
 router.post('/fy/advance-quarter', c.advanceQuarter);
 
 router.post('/seed', c.seed);
+router.post('/seed/clear', c.clearSeed);
 
 module.exports = router;
