@@ -566,21 +566,26 @@ async function getClient(user, id) {
 }
 
 async function createClient(user, body) {
-  if (!isFirmRole(user)) {
-    const err = new Error('Only admin/manager can add clients');
-    err.status = 403;
-    throw err;
-  }
   const settings = await getSettings();
   const curQ = settings.currentQuarter;
   const today = dstr(todayFromSettings(settings));
-  const resolved = await resolveManager(body.managerId, body.managerName);
-  const managerId = resolved.managerId;
-  const managerName = resolved.managerName;
-  if (!managerId) {
-    const err = new Error('Client manager is required — pick a team member');
-    err.status = 400;
-    throw err;
+
+  // Staff can add clients, but they are always allocated to themselves.
+  // Admin/manager can pick any client manager.
+  let managerId;
+  let managerName;
+  if (!isFirmRole(user)) {
+    managerId = user._id;
+    managerName = user.name;
+  } else {
+    const resolved = await resolveManager(body.managerId, body.managerName);
+    managerId = resolved.managerId;
+    managerName = resolved.managerName;
+    if (!managerId) {
+      const err = new Error('Client manager is required — pick a team member');
+      err.status = 400;
+      throw err;
+    }
   }
   const gst = !!body.gst;
   const bas = { q1: 'Not Required', q2: 'Not Required', q3: 'Not Required', q4: 'Not Required' };
