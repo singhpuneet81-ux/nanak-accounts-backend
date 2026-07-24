@@ -23,19 +23,8 @@ const practiceSettingsSchema = new mongoose.Schema(
         { k: 'q4', l: 'Jun 26', due: '28 Jul 2026' },
       ],
     },
-    offices: {
-      type: [String],
-      default: () => [
-        'Craigieburn',
-        'Tarneit',
-        'Cranbourne',
-        'Pakenham',
-        'Point Cook',
-        'Truganina',
-        'Officer',
-        'Melbourne CBD',
-      ],
-    },
+    // Legacy — no longer used in CM v4 UI (office removed). Kept so old docs still load.
+    offices: { type: [String], default: () => [] },
     reminderTemplate: {
       type: String,
       default:

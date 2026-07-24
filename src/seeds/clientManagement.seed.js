@@ -134,8 +134,12 @@ async function ensureStaffUsers() {
   return map;
 }
 
+const SEED_SOFTWARE = ['Xero', 'QuickBooks', 'MYOB', 'Reckon'];
+
 function buildClientDoc(row, staffMap, extras = {}) {
-  const [entity, abnVal, manager, office, pkg, fee, gst, payroll, qb, email, phone, bas, itr, type, isNewFlag] = row;
+  // row[3] is the legacy office column — retained in the fixtures but no longer persisted.
+  const [entity, abnVal, manager, , pkg, fee, gst, payroll, qb, email, phone, bas, itr, type, isNewFlag] = row;
+  const structure = type === 'Individual' ? 'Sole Trader' : type || 'Company';
   const mgr = staffMap[manager];
   const payrollMgrName = payroll ? PAYROLL_STAFF[Math.floor(Math.random() * PAYROLL_STAFF.length)] : null;
   const payq = PAY_MIX[entity]
@@ -159,15 +163,17 @@ function buildClientDoc(row, staffMap, extras = {}) {
   return {
     entity,
     abn: abnVal,
-    type: type || 'Company',
-    office,
+    type: structure,
+    status: 'Active',
+    exit: null,
+    software: SEED_SOFTWARE[Math.floor(Math.random() * SEED_SOFTWARE.length)],
     pkg,
     fee: pkg === 'On Package' ? fee : null,
     freq: pkg === 'On Package' ? 'Monthly' : null,
     pay: pkg === 'On Package' ? 'Pay Advantage' : null,
     gst: !!gst,
     payroll: !!payroll,
-    qb,
+    qb: qb === 'Connected' ? 'Connected' : 'Not Connected',
     email,
     phone,
     managerId: mgr?._id || null,

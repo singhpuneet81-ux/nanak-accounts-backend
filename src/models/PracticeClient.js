@@ -1,5 +1,19 @@
 const mongoose = require('mongoose');
 
+const EXIT_REASONS = [
+  'Fees too expensive',
+  'Moved to another accountant',
+  'Business closed or deregistered',
+  'Service or communication issue',
+  'Client relocated overseas',
+  'No longer requires our services',
+  'Deceased',
+  'Other',
+];
+
+const STRUCTURE_TYPES = ['Sole Trader', 'Company', 'Trust', 'SMSF', 'Partnership'];
+const SOFTWARE_OPTIONS = ['Xero', 'QuickBooks', 'MYOB', 'Reckon', ''];
+
 const noteSchema = new mongoose.Schema(
   {
     type: { type: String, enum: ['info', 'warning'], default: 'info' },
@@ -19,12 +33,13 @@ const activitySchema = new mongoose.Schema(
   { _id: false }
 );
 
-const reconSchema = new mongoose.Schema(
+const exitSchema = new mongoose.Schema(
   {
-    date: String,
-    by: String,
-    amount: Number,
-    src: String,
+    reason: { type: String, enum: EXIT_REASONS, required: true },
+    detail: { type: String, default: null },
+    date: { type: String, default: '' },
+    by: { type: String, default: '' },
+    byId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   },
   { _id: false }
 );
@@ -40,15 +55,35 @@ const practiceClientSchema = new mongoose.Schema(
   {
     entity: { type: String, required: true, index: true },
     abn: { type: String, default: '', index: true },
-    type: { type: String, enum: ['Company', 'Individual', 'Trust'], default: 'Company' },
-    office: { type: String, default: 'Craigieburn', index: true },
+    type: {
+      type: String,
+      enum: STRUCTURE_TYPES,
+      default: 'Company',
+      index: true,
+    },
+    status: {
+      type: String,
+      enum: ['Active', 'Inactive'],
+      default: 'Active',
+      index: true,
+    },
+    exit: { type: exitSchema, default: null },
+    software: {
+      type: String,
+      enum: SOFTWARE_OPTIONS,
+      default: '',
+    },
     pkg: { type: String, enum: ['On Package', 'Non Package'], default: 'Non Package' },
     fee: { type: Number, default: null },
     freq: { type: String, enum: ['Monthly', 'Quarterly', 'Annually', null], default: null },
     pay: { type: String, default: null },
     gst: { type: Boolean, default: false },
     payroll: { type: Boolean, default: false },
-    qb: { type: String, default: 'Not Required' },
+    qb: {
+      type: String,
+      enum: ['Connected', 'Not Connected'],
+      default: 'Not Connected',
+    },
     email: { type: String, default: '' },
     phone: { type: String, default: '' },
     managerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
@@ -90,6 +125,7 @@ const practiceClientSchema = new mongoose.Schema(
     isNewClient: { type: Boolean, default: false },
     history: { type: [mongoose.Schema.Types.Mixed], default: [] },
     activity: { type: [activitySchema], default: [] },
+    // Legacy soft-delete flag — prefer `status`. Kept for migration/back-compat.
     active: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -98,3 +134,6 @@ const practiceClientSchema = new mongoose.Schema(
 practiceClientSchema.index({ entity: 'text', abn: 'text', email: 'text' });
 
 module.exports = mongoose.model('PracticeClient', practiceClientSchema);
+module.exports.EXIT_REASONS = EXIT_REASONS;
+module.exports.STRUCTURE_TYPES = STRUCTURE_TYPES;
+module.exports.SOFTWARE_OPTIONS = SOFTWARE_OPTIONS;
