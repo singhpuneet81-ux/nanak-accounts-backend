@@ -44,6 +44,91 @@ function nameMatchRegex(name) {
   return new RegExp(`^${escapeRegex(String(name || '').trim())}$`, 'i');
 }
 
+/** Shared CSV columns for export ↔ import round-trip (fill genuine data, then re-import). */
+const CLIENT_CSV_HEADERS = [
+  'entity',
+  'abn',
+  'type',
+  'manager',
+  'package',
+  'fee',
+  'gst',
+  'payroll',
+  'software',
+  'quickbooks',
+  'email',
+  'phone',
+];
+
+function normalizePersonKey(name) {
+  return String(name || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+function personTokens(name) {
+  return normalizePersonKey(name).split(' ').filter(Boolean);
+}
+
+function isDemoEmail(email) {
+  return /@nanak\.demo$/i.test(String(email || ''));
+}
+
+/** Prefer manager role, non-demo email, then more complete (longer) display name. */
+function teamMemberScore(u) {
+  let s = 0;
+  if (u.role === 'manager') s += 100;
+  else if (u.role === 'staff') s += 50;
+  if (!isDemoEmail(u.email)) s += 40;
+  s += Math.min(String(u.name || '').trim().length, 80);
+  return s;
+}
+
+/**
+ * Team members available as client managers — same people as Team, deduped so
+ * "Aditya" / "Aditya Alok" / "ADITYA ALOK" collapse to one canonical user.
+ */
+async function listAssignableTeamMembers() {
+  const users = await User.find({ role: { $in: ['staff', 'manager'] }, active: true })
+    .select('name email role')
+    .lean();
+  const hasReal = users.some((u) => !isDemoEmail(u.email));
+  const pool = hasReal ? users.filter((u) => !isDemoEmail(u.email)) : users;
+
+  // Exact-name dedupe (case/whitespace insensitive)
+  const byExact = new Map();
+  for (const u of pool) {
+    const key = normalizePersonKey(u.name);
+    if (!key) continue;
+    const prev = byExact.get(key);
+    if (!prev || teamMemberScore(u) > teamMemberScore(prev)) byExact.set(key, u);
+  }
+  let list = [...byExact.values()];
+
+  // Drop truncated variants when a longer name extends the same tokens
+  // e.g. drop "Aditya" when "Aditya Alok" exists; drop "Karan Veer" when "Karan Veer Sharma" exists.
+  list = list.filter((u) => {
+    const ut = personTokens(u.name);
+    if (!ut.length) return false;
+    return !list.some((other) => {
+      if (String(other._id) === String(u._id)) return false;
+      const ot = personTokens(other.name);
+      if (ot.length <= ut.length) return false;
+      return ut.every((t, i) => t === ot[i]);
+    });
+  });
+
+  return list
+    .sort((a, b) => String(a.name).localeCompare(String(b.name), undefined, { sensitivity: 'base' }))
+    .map((s) => ({ _id: String(s._id), name: s.name, role: s.role, email: s.email }));
+}
+
+function pickBestUser(candidates) {
+  if (!candidates.length) return null;
+  return [...candidates].sort((a, b) => teamMemberScore(b) - teamMemberScore(a))[0];
+}
+
 /** Admin can edit any client; staff/manager can edit only clients assigned to them. */
 function canEditClient(user, c) {
   if (!user || !c) return false;
@@ -55,25 +140,59 @@ function canEditClient(user, c) {
   return false;
 }
 
-/** Resolve client manager from id and/or name so staff scoping by managerId always works. */
+/**
+ * Resolve client manager to a Team User. Always stores that user's canonical name.
+ * Matches exact name (case-insensitive), then unique token-prefix (e.g. "Aditya" → "Aditya Alok").
+ */
 async function resolveManager(managerId, managerName) {
   let id = managerId || null;
   let name = String(managerName || '').trim();
 
   if (id) {
-    const u = await User.findById(id).select('_id name').lean();
+    const u = await User.findById(id).select('_id name email role').lean();
     if (u) {
       return { managerId: u._id, managerName: u.name };
     }
   }
 
-  if (name) {
-    const u = await User.findOne({ name: nameMatchRegex(name), active: true })
-      .select('_id name')
-      .lean();
-    if (u) {
-      return { managerId: u._id, managerName: u.name };
+  if (!name) {
+    return { managerId: id || null, managerName: name };
+  }
+
+  const users = await User.find({
+    role: { $in: ['staff', 'manager', 'admin'] },
+    active: true,
+  })
+    .select('_id name email role')
+    .lean();
+
+  const hasReal = users.some((u) => !isDemoEmail(u.email));
+  const pool = hasReal ? users.filter((u) => !isDemoEmail(u.email) || u.role === 'admin') : users;
+
+  const key = normalizePersonKey(name);
+  const exact = pool.filter((u) => normalizePersonKey(u.name) === key);
+  let best = pickBestUser(exact);
+
+  if (!best) {
+    const qTokens = personTokens(name);
+    if (qTokens.length) {
+      const fuzzy = pool.filter((u) => {
+        const ut = personTokens(u.name);
+        if (ut.length < qTokens.length) return false;
+        return qTokens.every((t, i) => t === ut[i]);
+      });
+      // Only accept when a single preferred identity remains after scoring ties on same person key
+      const uniqueKeys = new Set(fuzzy.map((u) => normalizePersonKey(u.name)));
+      if (uniqueKeys.size === 1) {
+        best = pickBestUser(fuzzy);
+      } else if (fuzzy.length === 1) {
+        best = fuzzy[0];
+      }
     }
+  }
+
+  if (best) {
+    return { managerId: best._id, managerName: best.name };
   }
 
   return { managerId: id || null, managerName: name };
@@ -337,30 +456,68 @@ function splitStatusQuery(query = {}) {
   return { lifecycle: 'Active', bas };
 }
 
-function clientFilterQuery(user, query = {}) {
+async function clientFilterQuery(user, query = {}) {
   // Everyone with module access can SEE all clients; editing is gated separately.
   const { lifecycle } = splitStatusQuery(query);
   const filter = {};
   if (lifecycle !== 'All') filter.status = lifecycle;
+  if (query.pkg && query.pkg !== 'All') filter.pkg = query.pkg;
+  if (query.type && query.type !== 'All') filter.type = query.type;
+  if (query.software && query.software !== 'All') filter.software = query.software;
+
+  const and = [];
+
   if (query.managerId && query.managerId !== 'All') {
     filter.managerId = query.managerId;
   } else if (query.manager && query.manager !== 'All') {
     if (query.manager === 'mine' && user?._id) {
       filter.managerId = user._id;
     } else {
-      filter.managerName = nameMatchRegex(query.manager);
+      const resolved = await resolveManager(null, query.manager);
+      const targetName = resolved.managerName || query.manager;
+      const allUsers = await User.find({
+        role: { $in: ['staff', 'manager', 'admin'] },
+        active: true,
+      })
+        .select('_id name')
+        .lean();
+      const matchIds = allUsers
+        .filter((u) => {
+          const a = personTokens(u.name);
+          const b = personTokens(targetName);
+          if (!a.length || !b.length) return false;
+          if (normalizePersonKey(u.name) === normalizePersonKey(targetName)) return true;
+          const [short, long] = a.length <= b.length ? [a, b] : [b, a];
+          return short.every((t, i) => t === long[i]);
+        })
+        .map((u) => u._id);
+
+      if (matchIds.length) {
+        and.push({
+          $or: [
+            { managerId: { $in: matchIds } },
+            { managerName: nameMatchRegex(targetName) },
+            { managerName: nameMatchRegex(query.manager) },
+          ],
+        });
+      } else {
+        filter.managerName = nameMatchRegex(query.manager);
+      }
     }
   }
-  if (query.pkg && query.pkg !== 'All') filter.pkg = query.pkg;
-  if (query.type && query.type !== 'All') filter.type = query.type;
-  if (query.software && query.software !== 'All') filter.software = query.software;
+
   if (query.q) {
-    filter.$or = [
-      { entity: new RegExp(query.q, 'i') },
-      { abn: new RegExp(query.q, 'i') },
-      { email: new RegExp(query.q, 'i') },
-    ];
+    and.push({
+      $or: [
+        { entity: new RegExp(query.q, 'i') },
+        { abn: new RegExp(query.q, 'i') },
+        { email: new RegExp(query.q, 'i') },
+      ],
+    });
   }
+
+  if (and.length === 1) Object.assign(filter, and[0]);
+  else if (and.length > 1) filter.$and = and;
   return filter;
 }
 
@@ -374,16 +531,34 @@ async function repairMissingManagerIds() {
 
   if (!orphans.length) return 0;
 
-  const users = await User.find({ active: true }).select('_id name').lean();
-  const byName = new Map(users.map((u) => [String(u.name).trim().toLowerCase(), u]));
-
   let fixed = 0;
   for (const c of orphans) {
-    const u = byName.get(String(c.managerName).trim().toLowerCase());
-    if (!u) continue;
-    c.managerId = u._id;
-    c.managerName = u.name;
+    const resolved = await resolveManager(null, c.managerName);
+    if (!resolved.managerId) continue;
+    c.managerId = resolved.managerId;
+    c.managerName = resolved.managerName;
     await c.save();
+    fixed++;
+  }
+  return fixed;
+}
+
+/** Keep managerName in sync with the Team user pointed to by managerId. */
+async function syncManagerNamesFromTeam() {
+  const linked = await PracticeClient.find({ managerId: { $ne: null } })
+    .select('_id managerId managerName')
+    .lean();
+  if (!linked.length) return 0;
+
+  const ids = [...new Set(linked.map((c) => String(c.managerId)))];
+  const users = await User.find({ _id: { $in: ids } }).select('_id name').lean();
+  const byId = new Map(users.map((u) => [String(u._id), u.name]));
+
+  let fixed = 0;
+  for (const c of linked) {
+    const canonical = byId.get(String(c.managerId));
+    if (!canonical || String(c.managerName || '') === canonical) continue;
+    await PracticeClient.updateOne({ _id: c._id }, { $set: { managerName: canonical } });
     fixed++;
   }
   return fixed;
@@ -449,9 +624,8 @@ function serializeClient(c) {
 async function getMeta(user) {
   await ensureV4Migration();
   const settings = await getSettings();
-  const staff = await User.find({ role: { $in: ['staff', 'manager', 'admin'] }, active: true })
-    .select('name email role')
-    .lean();
+  // Client managers = Team staff/managers (deduped). Admins are not assignable managers.
+  const staff = await listAssignableTeamMembers();
   return {
     activeFy: settings.activeFy,
     currentQuarter: settings.currentQuarter,
@@ -467,7 +641,8 @@ async function getMeta(user) {
     payrollRate: settings.payrollRate,
     feeReviewMonths: settings.feeReviewMonths,
     isFirm: isFirmRole(user),
-    staff: staff.map((s) => ({ _id: String(s._id), name: s.name, role: s.role })),
+    staff: staff.map((s) => ({ _id: s._id, name: s.name, role: s.role })),
+    csvHeaders: CLIENT_CSV_HEADERS,
     today: dstr(todayFromSettings(settings)),
   };
 }
@@ -695,9 +870,10 @@ async function listClients(user, query = {}) {
   await ensureV4Migration();
   // Heal rows that have a manager name but no managerId (common after CSV / partial assigns)
   await repairMissingManagerIds();
+  await syncManagerNamesFromTeam();
   const settings = await getSettings();
   const { lifecycle, bas } = splitStatusQuery(query);
-  const filter = clientFilterQuery(user, query);
+  const filter = await clientFilterQuery(user, query);
   const page = Math.max(1, Number(query.page) || 1);
   const limit = Math.min(100, Math.max(1, Number(query.limit) || 25));
   let list = await PracticeClient.find(filter).sort({ entity: 1 }).lean();
@@ -778,7 +954,11 @@ async function createClient(user, body) {
   const managerId = resolved.managerId;
   const managerName = resolved.managerName;
   if (!managerId) {
-    const err = new Error('Client manager is required — pick a team member');
+    const err = new Error(
+      managerName
+        ? `Manager "${managerName}" does not match a Team member — use a name from Team (Client managers = Team members)`
+        : 'Client manager is required — pick a team member'
+    );
     err.status = 400;
     throw err;
   }
@@ -1428,35 +1608,70 @@ async function importClients(user, body) {
   }
   const rows = body.rows || [];
   const created = [];
-  for (const row of rows) {
+  const errors = [];
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const entity = String(row.entity || '').trim() || `(row ${i + 1})`;
     try {
+      if (!String(row.managerName || row.managerId || '').trim()) {
+        throw Object.assign(new Error('manager is required and must match a Team member'), { status: 400 });
+      }
       const c = await createClient(user, row);
       created.push(c);
-    } catch {
-      /* skip bad rows */
+    } catch (e) {
+      errors.push({
+        row: i + 1,
+        entity,
+        reason: e?.message || 'Import failed',
+      });
     }
   }
-  return { created: created.length, items: created };
+  return {
+    created: created.length,
+    failed: errors.length,
+    errors,
+    items: created,
+    headers: CLIENT_CSV_HEADERS,
+  };
 }
 
 async function exportClients(user) {
   const clients = await scopeClients(user);
-  const header = [
-    'entity', 'abn', 'type', 'annualType', 'status', 'manager', 'package', 'fee', 'gst', 'payroll',
-    'software', 'quickbooks', 'email', 'phone',
-  ];
-  const lines = [header.join(',')];
+  const ids = [...new Set(clients.map((c) => c.managerId).filter(Boolean).map(String))];
+  const users = ids.length
+    ? await User.find({ _id: { $in: ids } }).select('_id name').lean()
+    : [];
+  const nameById = new Map(users.map((u) => [String(u._id), u.name]));
+
+  const lines = [CLIENT_CSV_HEADERS.join(',')];
   for (const c of clients) {
+    const manager =
+      (c.managerId && nameById.get(String(c.managerId))) || c.managerName || '';
     lines.push(
       [
-        c.entity, c.abn, c.type, annualType(c), c.status || 'Active', c.managerName, c.pkg,
-        c.fee || '', c.gst, c.payroll, c.software || '', c.qb, c.email, c.phone,
+        c.entity,
+        c.abn,
+        c.type,
+        manager,
+        c.pkg,
+        c.fee || '',
+        c.gst,
+        c.payroll,
+        c.software || '',
+        c.qb,
+        c.email,
+        c.phone,
       ]
         .map((x) => `"${String(x ?? '').replace(/"/g, '""')}"`)
         .join(',')
     );
   }
-  return { csv: lines.join('\n'), filename: 'nanak-clients-export.csv', count: clients.length };
+  return {
+    csv: lines.join('\n'),
+    filename: 'nanak-clients-export.csv',
+    count: clients.length,
+    headers: CLIENT_CSV_HEADERS,
+  };
 }
 
 async function applyFeeUplift(user, body) {
