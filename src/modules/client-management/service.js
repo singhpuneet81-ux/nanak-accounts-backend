@@ -12,6 +12,47 @@ function isFirmRole(user) {
   return user.role === 'admin' || user.role === 'manager';
 }
 
+function escapeRegex(value) {
+  return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function nameMatchRegex(name) {
+  return new RegExp(`^${escapeRegex(String(name || '').trim())}$`, 'i');
+}
+
+/** Resolve client manager from id and/or name so staff scoping by managerId always works. */
+async function resolveManager(managerId, managerName) {
+  let id = managerId || null;
+  let name = String(managerName || '').trim();
+
+  if (id) {
+    const u = await User.findById(id).select('_id name').lean();
+    if (u) {
+      return { managerId: u._id, managerName: u.name };
+    }
+  }
+
+  if (name) {
+    const u = await User.findOne({ name: nameMatchRegex(name), active: true })
+      .select('_id name')
+      .lean();
+    if (u) {
+      return { managerId: u._id, managerName: u.name };
+    }
+  }
+
+  return { managerId: id || null, managerName: name };
+}
+
+/** Staff "My Clients" matches by managerId, with name fallback for mis-linked rows. */
+function staffAllocationFilter(user) {
+  const or = [{ managerId: user._id }];
+  if (user.name) {
+    or.push({ managerName: nameMatchRegex(user.name) });
+  }
+  return { $or: or };
+}
+
 function actorName(user) {
   return user?.name || 'System';
 }
@@ -129,26 +170,62 @@ function curDue(settings) {
 
 async function scopeClients(user, extra = {}) {
   const filter = { active: true, ...extra };
-  if (!isFirmRole(user)) filter.managerId = user._id;
+  if (!isFirmRole(user)) Object.assign(filter, staffAllocationFilter(user));
   return PracticeClient.find(filter).lean();
 }
 
 function clientFilterQuery(user, query = {}) {
   const filter = { active: true };
-  if (!isFirmRole(user)) filter.managerId = user._id;
-  else if (query.managerId && query.managerId !== 'All') filter.managerId = query.managerId;
-  else if (query.manager && query.manager !== 'All') filter.managerName = query.manager;
+  if (!isFirmRole(user)) {
+    Object.assign(filter, staffAllocationFilter(user));
+  } else if (query.managerId && query.managerId !== 'All') {
+    filter.managerId = query.managerId;
+  } else if (query.manager && query.manager !== 'All') {
+    // Case-insensitive match so "Shivanshu Nigam" and "shivanshu nigam" both work
+    filter.managerName = nameMatchRegex(query.manager);
+  }
   if (query.office && query.office !== 'All') filter.office = query.office;
   if (query.pkg && query.pkg !== 'All') filter.pkg = query.pkg;
   if (query.type && query.type !== 'All') filter.type = query.type;
   if (query.q) {
-    filter.$or = [
+    const textOr = [
       { entity: new RegExp(query.q, 'i') },
       { abn: new RegExp(query.q, 'i') },
       { email: new RegExp(query.q, 'i') },
     ];
+    if (filter.$or) {
+      filter.$and = [{ $or: filter.$or }, { $or: textOr }];
+      delete filter.$or;
+    } else {
+      filter.$or = textOr;
+    }
   }
   return filter;
+}
+
+/** Backfill missing managerId from managerName so staff lists stay correct. */
+async function repairMissingManagerIds() {
+  const orphans = await PracticeClient.find({
+    active: true,
+    managerName: { $nin: [null, ''] },
+    $or: [{ managerId: null }, { managerId: { $exists: false } }],
+  }).select('_id managerName managerId');
+
+  if (!orphans.length) return 0;
+
+  const users = await User.find({ active: true }).select('_id name').lean();
+  const byName = new Map(users.map((u) => [String(u.name).trim().toLowerCase(), u]));
+
+  let fixed = 0;
+  for (const c of orphans) {
+    const u = byName.get(String(c.managerName).trim().toLowerCase());
+    if (!u) continue;
+    c.managerId = u._id;
+    c.managerName = u.name;
+    await c.save();
+    fixed++;
+  }
+  return fixed;
 }
 
 function lodgementStats(list, settings) {
@@ -430,6 +507,8 @@ async function getDashboard(user) {
 }
 
 async function listClients(user, query = {}) {
+  // Heal rows that have a manager name but no managerId (common after CSV / partial assigns)
+  await repairMissingManagerIds();
   const settings = await getSettings();
   const filter = clientFilterQuery(user, query);
   const page = Math.max(1, Number(query.page) || 1);
@@ -451,10 +530,14 @@ async function getClient(user, id) {
     err.status = 404;
     throw err;
   }
-  if (!isFirmRole(user) && String(c.managerId) !== String(user._id)) {
-    const err = new Error('Forbidden');
-    err.status = 403;
-    throw err;
+  if (!isFirmRole(user)) {
+    const idMatch = c.managerId && String(c.managerId) === String(user._id);
+    const nameMatch = c.managerName && nameMatchRegex(user.name).test(String(c.managerName).trim());
+    if (!idMatch && !nameMatch) {
+      const err = new Error('Forbidden');
+      err.status = 403;
+      throw err;
+    }
   }
   const settings = await getSettings();
   let group = null;
@@ -491,14 +574,13 @@ async function createClient(user, body) {
   const settings = await getSettings();
   const curQ = settings.currentQuarter;
   const today = dstr(todayFromSettings(settings));
-  let managerName = body.managerName || '';
-  let managerId = body.managerId || null;
-  if (managerId) {
-    const u = await User.findById(managerId).lean();
-    if (u) managerName = u.name;
-  } else if (managerName) {
-    const u = await User.findOne({ name: new RegExp(`^${managerName}$`, 'i') }).lean();
-    if (u) managerId = u._id;
+  const resolved = await resolveManager(body.managerId, body.managerName);
+  const managerId = resolved.managerId;
+  const managerName = resolved.managerName;
+  if (!managerId) {
+    const err = new Error('Client manager is required — pick a team member');
+    err.status = 400;
+    throw err;
   }
   const gst = !!body.gst;
   const bas = { q1: 'Not Required', q2: 'Not Required', q3: 'Not Required', q4: 'Not Required' };
@@ -554,9 +636,12 @@ async function updateClient(user, id, body) {
     throw err;
   }
   if (!isFirmRole(user) && String(c.managerId) !== String(user._id)) {
-    const err = new Error('Forbidden');
-    err.status = 403;
-    throw err;
+    const nameOk = c.managerName && nameMatchRegex(user.name).test(String(c.managerName).trim());
+    if (!nameOk) {
+      const err = new Error('Forbidden');
+      err.status = 403;
+      throw err;
+    }
   }
   const settings = await getSettings();
   const today = dstr(todayFromSettings(settings));
@@ -570,14 +655,22 @@ async function updateClient(user, id, body) {
   for (const k of allowed) {
     if (body[k] !== undefined) c[k] = body[k];
   }
-  if (body.managerId !== undefined && isFirmRole(user)) {
-    c.managerId = body.managerId;
-    if (body.managerName) c.managerName = body.managerName;
-    else {
-      const u = await User.findById(body.managerId).lean();
-      if (u) c.managerName = u.name;
+  if ((body.managerId !== undefined || body.managerName !== undefined) && isFirmRole(user)) {
+    const resolved = await resolveManager(
+      body.managerId !== undefined ? body.managerId : c.managerId,
+      body.managerName !== undefined ? body.managerName : c.managerName
+    );
+    if (!resolved.managerId) {
+      const err = new Error('Client manager is required — pick a team member');
+      err.status = 400;
+      throw err;
     }
-    c.activity.push({ date: today, who, action: `Reallocated to ${c.managerName}` });
+    const prev = c.managerName || 'unassigned';
+    c.managerId = resolved.managerId;
+    c.managerName = resolved.managerName;
+    if (String(prev) !== String(c.managerName) || body.managerId !== undefined) {
+      c.activity.push({ date: today, who, action: `Reallocated to ${c.managerName}` });
+    }
   }
   if (body.bas && typeof body.bas === 'object') {
     for (const qk of QKEYS) {
@@ -750,7 +843,12 @@ async function getPayroll(user, query = {}) {
     list = runs.filter(
       (r) =>
         r.payrollMgr === user.name ||
-        clients.some((c) => String(c._id) === r.clientId && String(c.managerId) === String(user._id))
+        clients.some(
+          (c) =>
+            String(c._id) === r.clientId &&
+            (String(c.managerId) === String(user._id) ||
+              (c.managerName && nameMatchRegex(user.name).test(String(c.managerName).trim())))
+        )
     );
   }
   const f = query.filter || 'action';
