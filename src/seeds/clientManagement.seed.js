@@ -391,6 +391,61 @@ async function seedClientManagement({ force = false } = {}) {
   }
 
   await PracticeClient.insertMany(docs);
+
+  // Sample inactive client for v4 acceptance tests
+  const inactiveEntity = docs.find((d) => d.entity === 'SHREEJI GLOBAL VENTURES PTY LTD');
+  if (inactiveEntity) {
+    await PracticeClient.updateOne(
+      { entity: 'SHREEJI GLOBAL VENTURES PTY LTD' },
+      {
+        $set: {
+          status: 'Inactive',
+          active: false,
+          exit: {
+            reason: 'No longer requires our services',
+            detail: null,
+            date: '15 Jul 2026',
+            by: 'System',
+            byId: null,
+          },
+          activity: [
+            ...(inactiveEntity.activity || []),
+            {
+              date: '15 Jul 2026',
+              who: 'System',
+              action: 'Client marked inactive — No longer requires our services',
+            },
+          ],
+        },
+      }
+    );
+  }
+
+  // Seed a few overdue unpaid super overrides (pay date ~14+ days before todayOverride 23 Jul 2026)
+  const payrollClients = await PracticeClient.find({
+    status: 'Active',
+    payroll: true,
+    payFirstDate: { $ne: null },
+  })
+    .limit(3)
+    .lean();
+  for (const pc of payrollClients) {
+    await PracticePayrollOverride.findOneAndUpdate(
+      { clientId: pc._id, payDate: '2026-07-08' },
+      {
+        $set: {
+          status: 'Completed',
+          stp: 'Lodged',
+          super: 'Not Paid',
+          employees: pc.payrollActual || pc.payrollBilled || 1,
+          by: pc.payrollMgr || 'System',
+          on: '08 Jul 2026',
+        },
+      },
+      { upsert: true }
+    );
+  }
+
   return { seeded: true, count: docs.length, groups: 2, staff: STAFF_NAMES.length };
 }
 

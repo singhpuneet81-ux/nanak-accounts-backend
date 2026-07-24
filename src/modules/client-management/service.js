@@ -1207,13 +1207,14 @@ async function updatePayrollRun(user, body) {
   const settings = await getSettings();
   const today = dstr(todayFromSettings(settings));
   const existing = await PracticePayrollOverride.findOne({ clientId, payDate }).lean();
+  const superOnly = body.super !== undefined && status === undefined && stp === undefined;
   const superStatus =
     body.super === 'Paid' ? 'Paid' : body.super === 'Not Paid' ? 'Not Paid' : existing?.super || 'Not Paid';
   const update = {
-    status: status || 'Completed',
-    stp: stp || 'Lodged',
+    status: status !== undefined ? status : existing?.status || (superOnly ? 'Not Started' : 'Completed'),
+    stp: stp !== undefined ? stp : existing?.stp || (superOnly ? 'Not Lodged' : 'Lodged'),
     super: superStatus,
-    employees: c.payrollActual || c.payrollBilled,
+    employees: existing?.employees ?? (c.payrollActual || c.payrollBilled),
     by: actorName(user),
     on: today,
   };
@@ -1225,7 +1226,9 @@ async function updatePayrollRun(user, body) {
   c.activity.push({
     date: today,
     who: actorName(user),
-    action: `Payroll run ${payDate} marked ${update.status} / STP ${update.stp} / Super ${update.super}`,
+    action: superOnly
+      ? `Super for pay run ${payDate} marked ${update.super}`
+      : `Payroll run ${payDate} marked ${update.status} / STP ${update.stp} / Super ${update.super}`,
   });
   await c.save();
   return { ok: true };
